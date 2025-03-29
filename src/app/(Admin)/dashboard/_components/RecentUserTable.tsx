@@ -1,6 +1,6 @@
 "use client"
 
-import { ConfigProvider, TableProps } from "antd"
+import { TableProps } from "antd"
 import { Table } from "antd"
 import { Tooltip } from "antd"
 import { Tag } from "antd"
@@ -35,7 +35,7 @@ const users: IUser[] = Array.from({ length: 5 }).map((_, index) => ({
 
 const RecentUserTable = () => {
   const [showProfileModal, setShowProfileModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState({})
+  const [selectedUser, setSelectedUser] = useState<IUser | undefined>()
 
   // Get Recent Users
   // const { data: users, isLoading: isGetAllUsersLoading } = useGetAllUserQuery()
@@ -57,7 +57,7 @@ const RecentUserTable = () => {
   // }
 
   // =============== Table columns ===============
-  const columns: TableProps["columns"] = [
+  const columns: TableProps<IUser>["columns"] = [
     {
       title: "Sr. No.",
       dataIndex: "key",

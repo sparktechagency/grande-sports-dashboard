@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import catchAsync from "@/utils/catchAsync"
 import { toast } from "react-toastify"
 // import { setUser } from "@/redux/features/authSlice";
-import { jwtDecode } from "jwt-decode"
+// import { jwtDecode } from "jwt-decode"
 import FormWrapper from "@/components/form-components/FormWrapper"
 import UInput from "@/components/form-components/UInput"
 import { SubmitHandler } from "react-hook-form"
@@ -46,7 +46,7 @@ export default function LoginForm() {
       // // send user back or home
       // router.push("/");
       // router.refresh();
-
+      console.log(data)
       toast.success("Successfully Logged In!")
       router.push("/dashboard")
     })

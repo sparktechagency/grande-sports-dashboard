@@ -4,8 +4,6 @@ import { IPost } from "../page"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Icon } from "@iconify/react"
-import Video from "next-video"
-import Image from "next/image"
 // import Player from "next-video/player"
 
 dayjs.extend(relativeTime)
