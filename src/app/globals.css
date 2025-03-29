@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+@layer base {
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+}
+
+/* 
+* Tailwind Variables
+* - inline: directive used to reference custom css variables to use them as tailwind variables. 
+* - Reference: https://tailwindcss.com/docs/theme#referencing-other-variables 
+*/
+@theme {
+}
+
+@theme inline {
+  --font-poppins: var(--font-poppins);
+  --font-rama-gothic: var(--font-rama-gothic);
+
+  --color-primary: var(--primary);
+  --color-primary-50: var(--primary-50);
+  --color-primary-30: var(--primary-30);
+
+  --color-secondary: var(--secondary);
+  --color-danger: var(--danger);
+}
+
+:root {
+  --primary: rgb(5, 122, 58);
+  --primary-50: rgba(5, 122, 58, 0.4);
+  --primary-30: rgba(5, 122, 58, 0.3);
+
+  --secondary: rgb(37, 39, 40);
+
+  --danger: rgb(255, 13, 0);
+}
+
+body {
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* ---------- Hide Scrollbar ------------------ */
+.scroll-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+.scroll-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* --------- Custom Utilities ------------------ */
+.dashboard-container {
+  @apply bg-secondary min-h-[85vh] space-y-5 rounded-xl p-5;
+}
+
+/* --------- Custom Flexbox Utilities ----------- */
+
+.flex-center-start {
+  @apply flex items-center justify-start;
+}
+
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.flex-center-between {
+  @apply flex items-center justify-between;
+}
+
+.flex-center-end {
+  @apply flex items-center justify-end;
+}
+
+.flex-start-between {
+  @apply flex items-start justify-between;
+}
+
+.flex-center-start {
+  @apply flex items-center justify-start;
+}
+
+.flex-start-start {
+  @apply flex items-start justify-start;
+}
+
+.flex-stretch-between {
+  @apply flex items-stretch justify-between;
+}
+
+.flex-stretch-start {
+  @apply flex items-stretch justify-start;
+}
+
+.border-red {
+  @apply border border-red-500;
+}
+
+/* ================== */
+/* Sidebar Styles */
+/* ================== */
+.sidebar-menu > .ant-menu-item,
+.sidebar-menu .ant-menu-submenu {
+  @apply !rounded-lg !border-none bg-transparent !text-lg !font-medium text-white !shadow-none;
+}
+
+.sidebar-menu > .ant-menu-item {
+  @apply !flex !h-13 !items-center !gap-1;
+}
+.sidebar-menu .ant-menu-submenu {
+  @apply !min-h-13 !pt-0.5;
+}
+
+.sidebar-menu .ant-menu-sub .ant-menu-item {
+  @apply !h-13;
+}
+
+.sidebar-menu .ant-menu-submenu .ant-menu-submenu-title {
+  @apply !flex !items-center !gap-1 text-white;
+}
+
+.sidebar-menu > .ant-menu-item:hover {
+  @apply !bg-primary !text-white;
+}
+
+.ant-menu-sub {
+  @apply !rounded-xl;
+}
+
+.sidebar-menu > .ant-menu-item-selected {
+  @apply bg-primary border border-white font-medium text-white;
+}
+
+.sidebar-menu .ant-menu-submenu {
+  @apply mx-auto w-[97%];
+}
+
+.sidebar-menu .ant-menu-submenu .ant-menu-submenu-title {
+  @apply !pl-[19px];
+}
+
+.sidebar-menu
+  .ant-menu-submenu.ant-menu-submenu-vertical
+  .ant-menu-submenu-title {
+  @apply !pl-[24px];
+}
+
+.sidebar-menu .ant-menu-sub .ant-menu-item:hover {
+  @apply !bg-primary !text-white;
+}
+
+.ant-menu-submenu-title:hover {
+  @apply !bg-transparent;
+}
+
+.sidebar-menu .ant-menu-item:hover > svg {
+  transition: color 0.7s ease-in-out !important;
+}
+
+/* :where(.css-dev-only-do-not-override-tjsggz).ant-menu-light.ant-menu-inline
+  .ant-menu-sub.ant-menu-inline {
+  @apply bg-white;
+} */
+
+:where(.css-dev-only-do-not-override-tjsggz).ant-menu
+  .ant-menu-item
+  .ant-menu-item-icon {
+  min-width: 25px !important;
+}
+
+:where(.css-dev-only-do-not-override-tjsggz).ant-menu
+  .ant-menu-submenu-title
+  .ant-menu-item-icon {
+  min-width: 25px !important;
+}
+
+/* =================================== */
+/* Custom Antd Components Styling */
+/* =================================== */
+.ant-table {
+  font-family: var(--font-poppins) !important;
+}
+
+.ant-table-cell {
+  font-weight: 500;
+}
+
+.ant-tag {
+  font-family: var(--font-poppins) !important;
+  border-radius: 9999px !important;
+  padding-inline: 12px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+.anticon.anticon-delete {
+  color: var(--danger) !important;
+}
