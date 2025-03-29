@@ -41,25 +41,25 @@ export default function UserProfileModal({
             <h5 className="font-bold">User ID</h5>
             <p className="text-base">{user?.id}</p>
           </div> */}
-          <div className="text-black">
+          <div>
             <h5 className="font-bold">Name</h5>
             <p className="text-base">{user?.name}</p>
           </div>
-          <div className="text-black">
+          <div>
             <h5 className="font-bold">Email</h5>
             <p className="text-base">{user?.email}</p>
           </div>
-          <div className="text-black">
+          <div>
             <h5 className="font-bold">Contact</h5>
             <p className="text-base">{user?.contactNumber}</p>
           </div>
-          <div className="text-black">
-            <h5 className="font-bold">Status</h5>
+          <div>
+            <h5 className="!mb-1 font-bold">Status</h5>
             <Tag color={getTagColor(user?.status)} className="capitalize">
               {user?.status}
             </Tag>
           </div>
-          <div className="text-black">
+          <div>
             <h5 className="font-bold">Joined At</h5>
             <p>{dayjs(user?.createdAt).format("DD MMM YYYY, hh:mm A")}</p>
           </div>
