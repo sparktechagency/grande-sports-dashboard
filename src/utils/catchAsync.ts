@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify"
 
 const catchAsync = async (fn: () => Promise<any>) => {
   try {
-    await fn();
+    await fn()
   } catch (error: any) {
     toast.error(
       error?.message || error?.data?.message || "Something Went Wrong!",
-    );
-    return error;
+    )
+    return error
   }
-};
+}
 
-export default catchAsync;
+export default catchAsync

@@ -1,5 +1,5 @@
-import { withNextVideo } from "next-video/process";
-import type { NextConfig } from "next";
+import { withNextVideo } from "next-video/process"
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   redirects: async () => [
@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
       source: "/",
       destination: "/dashboard",
       permanent: false,
-    }
-  ]
-};
+    },
+  ],
+}
 
-export default withNextVideo(nextConfig);
+export default withNextVideo(nextConfig)

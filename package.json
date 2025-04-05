@@ -6,7 +6,8 @@
     "dev": "next dev & npx next-video sync -w",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prettier:fix": "prettier --write ."
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",

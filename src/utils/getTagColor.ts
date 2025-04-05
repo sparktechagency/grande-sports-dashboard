@@ -1,33 +1,33 @@
 const getTagColor = (value: string) => {
-  let color = "";
+  let color = ""
   switch (value?.toLowerCase()) {
     case "active":
-      color = "green-inverse";
-      break;
+      color = "green-inverse"
+      break
     case "deactive":
-      color = "red-inverse";
-      break;
+      color = "red-inverse"
+      break
     case "blocked":
-      color = "red-inverse";
-      break;
+      color = "red-inverse"
+      break
     case "annual fee":
-      color = "green-inverse";
-      break;
+      color = "green-inverse"
+      break
     case "monthly fee":
-      color = "geekblue-inverse";
-      break;
+      color = "geekblue-inverse"
+      break
     case "paid":
-      color = "green";
-      break;
+      color = "green"
+      break
     case "refunded":
-      color = "red";
-      break;
+      color = "red"
+      break
     case "unpaid":
-      color = "pink";
-      break;
+      color = "pink"
+      break
   }
 
-  return color;
-};
+  return color
+}
 
-export default getTagColor;
+export default getTagColor
