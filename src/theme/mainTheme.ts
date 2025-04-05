@@ -53,6 +53,7 @@ const mainTheme: ThemeConfig = {
     Select: {
       colorBorder: "#a2a2a3",
       colorText: "#fff",
+      colorBgElevated: "#000",
       colorBgContainer: "transparent",
       colorTextPlaceholder: "lightGray",
     },

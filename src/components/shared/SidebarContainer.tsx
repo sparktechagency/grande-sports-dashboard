@@ -39,7 +39,7 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({ collapsed }) => {
     {
       key: "subscription",
       icon: <Icon icon="ri:money-dollar-circle-line" height={26} width={26} />,
-      label: "Subscription",
+      label: <Link href={"/subscription"}>Subscription</Link>,
     },
     {
       key: "videos",
