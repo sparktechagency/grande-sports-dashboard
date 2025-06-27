@@ -39,7 +39,7 @@ const UOtpInput = ({
           validateStatus={error ? "error" : ""}
           help={error ? error.message : ""}
         >
-          <Input.OTP size="large" {...field} />
+          <Input.OTP size="large" length={4} {...field} />
         </Form.Item>
       )}
     />

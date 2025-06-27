@@ -12,39 +12,36 @@ import {
   useForm,
   UseFormProps,
 } from "react-hook-form"
-
-interface FormWrapperProps {
-  onSubmit: SubmitHandler<any>
+interface FormWrapperProps<T extends FieldValues = FieldValues> {
+  onSubmit: SubmitHandler<T>
   children: React.ReactNode
-  defaultValues?: FieldValues
-  resolver?: Resolver<FieldValues>
+  defaultValues?: T
+  resolver?: Resolver<T>
   className?: string
 }
 
-export default function FormWrapper({
+export default function FormWrapper<T extends FieldValues = FieldValues>({
   onSubmit,
   children,
   defaultValues,
   resolver,
   className,
-}: FormWrapperProps) {
-  const formConfig: UseFormProps = {}
+}: FormWrapperProps<T>) {
+  const formConfig: UseFormProps<T> = {}
 
   if (resolver) {
     formConfig["resolver"] = resolver
   }
 
-  // set default value-------------------------
-  const methods = useForm(formConfig)
+  const methods = useForm<T>(formConfig)
 
   useEffect(() => {
     if (defaultValues) {
-      // Set default values after form is mounted
       methods.reset(defaultValues)
     }
   }, [defaultValues, methods])
 
-  const handleSubmit = (data: FieldValues) => {
+  const handleSubmit = (data: T) => {
     onSubmit(data)
 
     if (envConfig()?.nodeEnv !== "development") {

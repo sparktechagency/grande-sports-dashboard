@@ -1,46 +1,37 @@
 "use client"
 
-import { Button, Flex } from "antd"
+import { Button, Flex, Pagination } from "antd"
 import { Icon } from "@iconify/react/dist/iconify.js"
 import { lazy, useState } from "react"
-import userImg from "@/assets/images/user.png"
 import PostCard from "./_components/PostCard"
-import thumbnailImg from "@/assets/images/video-thumbnail.jpg"
-import { StaticImageData } from "next/image"
+import { useGetMyPostsQuery } from "@/redux/apis/postApi"
+import Spinner from "@/components/skeletons/Spinner"
+import ErrorComponent from "@/components/skeletons/ErrorComponent"
 
 const CreatePostModal = lazy(() => import("./_components/CreatePostModal"))
 
-export interface IPost {
-  key: number
-  user: {
-    name: string
-    profilePicture: string
-  }
-  content: {
-    text: string
-    videoUrl: string
-    videoThumbnail: StaticImageData
-  }
-  createdAt: Date
-}
-
-//! Dummy Posts
-const posts: IPost[] = Array.from({ length: 5 }).map((_, index) => ({
-  key: index + 1,
-  user: {
-    name: "John Doe",
-    profilePicture: userImg?.src,
-  },
-  content: {
-    text: "Football, also known as soccer, is the world's most popular sport, bringing together players and fans from all corners of the globe. It’s a game of skill, strategy, and passion, where teamwork and dedication make the difference. Whether you're perfecting your dribbling, mastering precise passes, or training for peak fitness, football pushes athletes to their limits.",
-    videoUrl: "https://youtu.be/2KWMoLr9aPY",
-    videoThumbnail: thumbnailImg,
-  },
-  createdAt: new Date(),
-}))
-
 export default function Community() {
-  const [showCreatePostModal, setShowCreatePostModal] = useState<boolean>(false)
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false)
+  const [page, setPage] = useState(1)
+  const limit = 6
+
+  const { data, isLoading, isError, error, refetch } = useGetMyPostsQuery({
+    page,
+    limit,
+  })
+
+  if (isLoading) return <Spinner />
+  if (isError)
+    return (
+      <ErrorComponent
+        message={(error as any)?.data?.message}
+        onRetry={refetch}
+        className="flex h-[65vh] items-center justify-center"
+      />
+    )
+
+  const posts = data?.data || []
+  const total = data?.meta?.total || 0
 
   return (
     <div className="mx-auto w-[90%] lg:w-[85%] xl:w-3/4">
@@ -59,10 +50,23 @@ export default function Community() {
 
       {/* Posts */}
       <section className="mt-10 space-y-10">
-        {posts.map((post) => (
-          <PostCard key={post.key} post={post} />
+        {posts.map((post: any) => (
+          <PostCard key={post._id} post={post} />
         ))}
       </section>
+
+      {/* Pagination */}
+      <div className="mt-10 text-center">
+        {total > limit && (
+          <Pagination
+            current={page}
+            pageSize={limit}
+            total={total}
+            onChange={(p) => setPage(p)}
+            showSizeChanger={false}
+          />
+        )}
+      </div>
 
       {/* Modals */}
       <CreatePostModal

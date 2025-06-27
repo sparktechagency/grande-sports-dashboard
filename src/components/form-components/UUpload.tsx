@@ -24,8 +24,8 @@ export default function UUpload({
   maxCount = 1,
   labelStyles = {},
   fileList,
-  fileType = "image",
-  fileSize = 5,
+  fileType = "image", // now also supports "both"
+  fileSize = 5, // default max 5MB
   required = true,
   borderClassName = "",
 }: UUploadProps & UploadProps) {
@@ -39,17 +39,19 @@ export default function UUpload({
       rules={{
         required: {
           value: required,
-          message: `${label} is required`,
+          message: `${label || uploadTitle} is required`,
         },
       }}
       render={({ field, fieldState: { error } }) => (
         <div className="mb-3">
-          <label
-            style={labelStyles}
-            className="mb-2 flex items-center gap-x-1 font-medium"
-          >
-            {required && <span className="text-[#ff4d4f]">*</span>} {label}
-          </label>
+          {label && (
+            <label
+              style={labelStyles}
+              className="mb-2 flex items-center gap-x-1 font-medium"
+            >
+              {required && <span className="text-[#ff4d4f]">*</span>} {label}
+            </label>
+          )}
 
           <div
             className={cn(
@@ -67,18 +69,27 @@ export default function UUpload({
               }}
               multiple={maxCount > 1}
               beforeUpload={(file) => {
-                // const isValidFileType = file.type.startsWith(fileType);
-                const isValidFileSize = file.size / 1024 / 1024 < fileSize // default 5 MB
+                const isValidSize = file.size / 1024 / 1024 < fileSize
 
-                if (!file.type.startsWith(fileType)) {
+                const isImage = file.type.startsWith("image")
+                const isVideo = file.type.startsWith("video")
+
+                const allowed =
+                  fileType === "both"
+                    ? isImage || isVideo
+                    : fileType === "image"
+                      ? isImage
+                      : isVideo
+
+                if (!allowed) {
                   toast.error(
-                    `Invalid file type!! Only ${fileType} files are allowed.`,
+                    `Only ${fileType === "both" ? "image or video" : fileType} files are allowed.`,
                   )
                   return Upload.LIST_IGNORE
                 }
 
-                if (!isValidFileSize) {
-                  toast.error("File size exceeds 5MB!!")
+                if (!isValidSize) {
+                  toast.error(`File size exceeds ${fileSize}MB!`)
                   return Upload.LIST_IGNORE
                 }
 
@@ -96,7 +107,7 @@ export default function UUpload({
             </Upload>
           </div>
 
-          {error && <p className="text-danger">{error.message}</p>}
+          {error && <p className="text-danger text-sm">{error.message}</p>}
         </div>
       )}
     />

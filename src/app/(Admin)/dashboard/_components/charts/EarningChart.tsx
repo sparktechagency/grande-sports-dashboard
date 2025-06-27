@@ -57,6 +57,9 @@ const EarningChart = ({ data, setSelectedEarningYear }: EarningChartProps) => {
             tickLine={true}
             tick={{ fill: "white" }}
             dataKey="month"
+            tickFormatter={(month) => {
+              return data.length > 6 ? month.slice(0, 3) : month
+            }}
             interval={0}
             padding={{ left: 0, right: 0 }}
           />

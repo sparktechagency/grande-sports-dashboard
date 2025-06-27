@@ -2,18 +2,27 @@
 
 import FormWrapper from "@/components/form-components/FormWrapper"
 import UInput from "@/components/form-components/UInput"
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { forgotPassSchema } from "@/schema/authSchema";
+import { useForgotPasswordMutation } from "@/redux/apis/authApi"
+import handleMutation from "@/utils/handleMutation"
+import { forgotPassSchema } from "@/validation/auth.validation"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "antd"
+import { useRouter } from "next/navigation"
 import { SubmitHandler } from "react-hook-form"
+import { z } from "zod"
+import Cookies from "js-cookie"
 
-interface IFormValues {
-  email: string
-}
+type IFormValues = z.infer<typeof forgotPassSchema>
 
 export default function ForgotPassForm() {
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation()
+  const router = useRouter()
+  const onSuccess = (res: any) => {
+    Cookies.set("verifyToken", res.data.verifyToken, { path: "/" })
+    router.push(`/auth/otp-verification`)
+  }
   const onSubmit: SubmitHandler<IFormValues> = (data) => {
-    console.log(data)
+    handleMutation(data, forgotPassword, "Sending OTP...", onSuccess)
   }
 
   return (
@@ -25,7 +34,7 @@ export default function ForgotPassForm() {
         </p>
       </section>
 
-      <FormWrapper onSubmit={onSubmit}>
+      <FormWrapper onSubmit={onSubmit} resolver={zodResolver(forgotPassSchema)}>
         <UInput
           name="email"
           type="email"
@@ -36,11 +45,13 @@ export default function ForgotPassForm() {
         />
 
         <Button
+          htmlType="submit"
           type="primary"
+          disabled={isLoading}
           size="large"
           className="!h-10 w-full !font-semibold"
         >
-          Submit
+          {isLoading ? "Sending OTP..." : "Send OTP"}
         </Button>
       </FormWrapper>
     </div>

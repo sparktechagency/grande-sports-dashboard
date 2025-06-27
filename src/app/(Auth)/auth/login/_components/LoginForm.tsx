@@ -1,18 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import Link from "next/link"
 import { Button } from "antd"
-import { useRouter } from "next/navigation"
-// import { useDispatch } from "react-redux";
-// import { useSignInMutation } from "@/redux/api/authApi";
-import catchAsync from "@/utils/catchAsync"
-import { toast } from "react-toastify"
-// import { setUser } from "@/redux/features/authSlice";
-// import { jwtDecode } from "jwt-decode"
 import FormWrapper from "@/components/form-components/FormWrapper"
 import UInput from "@/components/form-components/UInput"
 import { SubmitHandler } from "react-hook-form"
-// import usePushNotification from "@/hooks/usePushNotification";
+import { loginSchema } from "@/validation/auth.validation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useAppDispatch } from "@/redux/hooks"
+import { setUser } from "@/redux/slices/authSlice"
+import { useRouter, useSearchParams } from "next/navigation"
+import handleMutation from "@/utils/handleMutation"
+import { useSignInMutation } from "@/redux/apis/authApi"
+import { jwtDecode } from "jwt-decode"
+import { toast } from "react-toastify"
 
 interface IFormValues {
   email: string
@@ -20,36 +22,28 @@ interface IFormValues {
 }
 
 export default function LoginForm() {
+  const dispatch = useAppDispatch()
+  const params = useSearchParams()
   const router = useRouter()
-  // const dispatch = useDispatch();
-  // const [signIn, { isLoading }] = useSignInMutation();
+  const redirectUrl = params.get("redirect") || "/dashboard"
+  const onSuccess = (res: any) => {
+    const user = jwtDecode(res.data.accessToken)
+    if ((user as any).role !== "admin")
+      return toast.warning("You are not an admin!")
+    dispatch(
+      setUser({
+        user,
+        accessToken: res.data.accessToken,
+        refreshToken: res.data.refreshToken,
+      }),
+    )
+    router.push(redirectUrl)
+  }
 
-  // const { fcmToken, notificationPermissionStatus } = usePushNotification();
-
+  // handle login
+  const [login, { isLoading }] = useSignInMutation()
   const onLoginSubmit: SubmitHandler<IFormValues> = async (data) => {
-    // if (fcmToken) {
-    //   data["fcm_token"] = fcmToken;
-    // }
-
-    await catchAsync(async () => {
-      // const res = await signIn(data).unwrap();
-      // toast.success("Successfully Logged In!");
-
-      // // set user
-      // dispatch(
-      //   setUser({
-      //     user: jwtDecode(res?.data?.token),
-      //     token: res?.data?.token,
-      //   }),
-      // );
-
-      // // send user back or home
-      // router.push("/");
-      // router.refresh();
-      console.log(data)
-      toast.success("Successfully Logged In!")
-      router.push("/dashboard")
-    })
+    handleMutation(data, login, "Logging in...", onSuccess)
   }
   return (
     <div className="w-full rounded-none px-6 py-8">
@@ -62,11 +56,11 @@ export default function LoginForm() {
 
       <FormWrapper
         onSubmit={onLoginSubmit}
-        // resolver={zodResolver(loginSchema)}
-        // defaultValues={{
-        //   email: "admin@gmail.com",
-        //   password: "admin",
-        // }}
+        resolver={zodResolver(loginSchema)}
+        defaultValues={{
+          email: "junayednoman05@gmail.com",
+          password: "encrypted",
+        }}
       >
         <UInput
           name="email"
@@ -91,13 +85,13 @@ export default function LoginForm() {
           type="primary"
           size="large"
           className="!h-10 w-full !font-semibold"
-          // loading={isLoading}
+          disabled={isLoading}
         >
-          Log In
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
 
         <Link
-          href="/forgot-password"
+          href="/auth/forgot-password"
           className="text-primary-blue hover:text-primary-blue/85 mt-2 block text-center font-medium"
         >
           Forgot Password?

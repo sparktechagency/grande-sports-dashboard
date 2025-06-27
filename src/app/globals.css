@@ -197,3 +197,7 @@ body {
 .anticon.anticon-delete {
   color: var(--danger) !important;
 }
+
+.react-player__preview {
+  border-radius: 12px;
+}

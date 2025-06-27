@@ -6,6 +6,9 @@ import USelect from "@/components/form-components/USelect"
 import { billingCycleOptions } from "./CreateSubscriptionModal"
 import FormWrapper from "@/components/form-components/FormWrapper"
 import { Button } from "antd"
+import UTextArea from "@/components/form-components/UTextArea"
+import { useUpdatePackageMutation } from "@/redux/apis/packageApi"
+import handleMutation from "@/utils/handleMutation"
 
 interface EditSubscriptionModalProps {
   open: boolean
@@ -18,8 +21,19 @@ export default function EditSubscriptionModal({
   setOpen,
   subscriptionPlan,
 }: EditSubscriptionModalProps) {
+  const [updatePackage, { isLoading }] = useUpdatePackageMutation()
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data)
+    if (typeof data.description === "string")
+      data.description = data.description.split(",")
+    data.price = Number(data.price)
+    handleMutation(
+      { id: subscriptionPlan._id, payload: data },
+      updatePackage,
+      "Updating subscription...",
+      () => {
+        setOpen(false)
+      },
+    )
   }
 
   if (!subscriptionPlan) {
@@ -28,9 +42,9 @@ export default function EditSubscriptionModal({
 
   return (
     <ModalWrapper open={open} setOpen={setOpen}>
-      <FormWrapper onSubmit={onSubmit}>
+      <FormWrapper defaultValues={subscriptionPlan} onSubmit={onSubmit}>
         <UInput
-          name="name"
+          name="title"
           label="Subscription Name"
           placeholder="Enter subscription name"
           required={true}
@@ -49,14 +63,20 @@ export default function EditSubscriptionModal({
           placeholder="Enter price"
           required={true}
         />
+        <UTextArea
+          name="description"
+          label="Description"
+          placeholder="Enter features. Separated by comma"
+        />
 
         <Button
           type="primary"
           htmlType="submit"
           className="w-full"
           size="large"
+          loading={isLoading}
         >
-          Submit
+          {isLoading ? "Updating..." : "Update"}
         </Button>
       </FormWrapper>
     </ModalWrapper>

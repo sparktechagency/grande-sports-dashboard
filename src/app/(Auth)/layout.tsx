@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: PropsWithChildren) {
 
           {!pathName?.includes("login") && (
             <Link
-              href="/login"
+              href="/auth/login"
               className="flex-center-start mt-5 gap-x-2 text-sm text-white/80 hover:text-white"
             >
               <Icon icon="lucide:move-left" height={18} width={18} /> Back to

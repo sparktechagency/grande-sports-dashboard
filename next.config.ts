@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
       permanent: false,
     },
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // allow all
+      },
+      {
+        protocol: "http",
+        hostname: "**", // allow all
+      },
+    ],
+  },
 }
 
 export default withNextVideo(nextConfig)

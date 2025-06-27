@@ -23,7 +23,7 @@ export default function PlaylistCard({ playlist, idx }: PlaylistCardProps) {
   const currentPathname = usePathname()
 
   return (
-    <div key={playlist.id}>
+    <div key={idx}>
       <div
         style={{
           height: ThumbnailHeight,
@@ -34,10 +34,11 @@ export default function PlaylistCard({ playlist, idx }: PlaylistCardProps) {
         <div className="h-full w-full">
           {playlist?.thumbnails?.map((thumbnail, thumbIdx) => (
             <Image
+              width={ThumbnailWidth}
+              height={ThumbnailHeight}
               key={idx}
               src={thumbnail}
               alt={playlist.title}
-              placeholder="blur"
               className={cn(
                 "border-secondary/50 absolute inset-0 mx-auto block h-[95%] w-full cursor-pointer rounded-xl border object-cover object-center transition-all duration-300 ease-in-out hover:brightness-80",
                 thumbIdx === 0

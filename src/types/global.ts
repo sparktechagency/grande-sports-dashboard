@@ -17,3 +17,4 @@ export type TUploadFileType =
   | ".doc"
   | ".docx"
   | ".txt"
+  | "both"

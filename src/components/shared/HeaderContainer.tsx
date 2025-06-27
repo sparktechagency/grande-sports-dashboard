@@ -1,12 +1,19 @@
 "use client"
 
-import { Dropdown, Flex } from "antd"
+import { Popover, Flex } from "antd"
 import Image from "next/image"
 import Link from "next/link"
-import userAvatar from "@/assets/images/admin.jpg"
 import { usePathname } from "next/navigation"
 import { Layout } from "antd"
 import { Icon } from "@iconify/react"
+import { defaultAvatar } from "@/constant/global.constant"
+import { useGetUserProfileQuery } from "@/redux/apis/userApi"
+import { useAppSelector } from "@/redux/hooks"
+import { selectUser } from "@/redux/slices/authSlice"
+import { useGetNotificationsQuery } from "@/redux/apis/notificationApi"
+import { format } from "date-fns"
+import { useEffect, useRef, useState } from "react"
+
 const { Header } = Layout
 
 interface HeaderContainerProps {
@@ -14,57 +21,63 @@ interface HeaderContainerProps {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-interface Notification {
-  id: number
-  message: string
-  time: string
-}
-
-// Dummy Notification Data
-const notifications: Notification[] = [
-  {
-    id: 1,
-    message: "A new post was made in the community",
-    time: "Sat, 12:30pm",
-  },
-  {
-    id: 2,
-    message: "A Payment was made to id: #OYLD4353",
-    time: "Oct 24, 12:30pm",
-  },
-  {
-    id: 3,
-    message: "New video upload was successful",
-    time: "Fri, 12:30pm",
-  },
-]
-
-const notificationMenu = notifications.map((notification) => ({
-  key: notification.id,
-  label: (
-    <div className="p-2 text-start">
-      <div className="flex items-center gap-x-3">
-        <Icon
-          icon="solar:bell-outline"
-          height={26}
-          width={26}
-          color="var(--primary)"
-        />
-        <div className="flex flex-col items-start">
-          <p className="text-sm font-medium">{notification.message}</p>
-          <p className="text-primary">{notification.time}</p>
-        </div>
-      </div>
-    </div>
-  ),
-}))
-
 export default function HeaderContainer({
   collapsed,
   setCollapsed,
 }: HeaderContainerProps) {
+  const [page, setPage] = useState(1)
+  const limit = 5
+  const observerRef = useRef<HTMLDivElement>(null)
+
+  const { data: notificationRes, isFetching } = useGetNotificationsQuery({ page, limit })
+  const notifications = notificationRes?.data || []
+
   const pathname = usePathname()
   const navbarTitle = pathname.split("/")[1]
+  const tokenUser = useAppSelector(selectUser)
+  const { data } = useGetUserProfileQuery("", { skip: !tokenUser })
+  const user = data?.data
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const el = e.currentTarget
+    const isBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10
+    if (isBottom && !isFetching) {
+      setPage((prev) => prev + 1)
+    }
+  }
+
+  const notificationContent = (
+    <div
+      style={{ maxHeight: "300px", overflowY: "auto", width: "300px" }}
+      onScroll={handleScroll}
+    >
+      {notifications.map((notification: any) => (
+        <div
+          key={notification.id}
+          className="p-3 border-b border-gray-700 text-start"
+        >
+          <div className="flex items-center gap-x-3">
+            <Icon
+              icon="solar:bell-outline"
+              height={26}
+              width={26}
+              color="var(--primary)"
+            />
+            <div className="flex flex-col items-start">
+              <p className="text-sm font-medium">{notification.message}</p>
+              <p className="text-primary text-xs">
+                {format(new Date(notification.date), "dd MMMM, yyyy")}
+              </p>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {isFetching && (
+        <p className="text-center text-xs text-gray-400 py-2">Loading more...</p>
+      )}
+    </div>
+  )
 
   return (
     <Header
@@ -101,14 +114,9 @@ export default function HeaderContainer({
 
       {/* Right --- notification, user profile */}
       <Flex align="center" justify="start" gap={10}>
-        <Dropdown
-          menu={{ items: notificationMenu }}
-          trigger={["click"]}
-          className="header-notification-dropdown"
-        >
+        <Popover content={notificationContent} trigger="click" placement="bottomRight">
           <button className="flex-center bg-primary relative aspect-square size-11 rounded-full !leading-none">
             <div className="absolute top-2 right-3 size-3 rounded-full bg-red-400" />
-
             <Icon
               icon="solar:bell-outline"
               height={26}
@@ -116,7 +124,7 @@ export default function HeaderContainer({
               color="#fff"
             />
           </button>
-        </Dropdown>
+        </Popover>
 
         {/* User */}
         <Link
@@ -124,7 +132,7 @@ export default function HeaderContainer({
           className="hover:text-primary-blue group flex items-center gap-x-2 text-black"
         >
           <Image
-            src={userAvatar}
+            src={user?.photoUrl || defaultAvatar}
             alt="Admin avatar"
             width={52}
             height={52}
@@ -132,7 +140,7 @@ export default function HeaderContainer({
           />
 
           <h4 className="hover:text-primary text-lg font-semibold text-white">
-            Miguel
+            {user?.name?.split(" ")[0]}
           </h4>
         </Link>
       </Flex>

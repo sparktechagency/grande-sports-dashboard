@@ -4,79 +4,80 @@ import { Table, TableProps } from "antd"
 import { Tooltip } from "antd"
 import { Tag } from "antd"
 import { useState } from "react"
-// import ProfileModal from "@/components/SharedModals/ProfileModal"
 import getTagColor from "@/utils/getTagColor"
 import { Icon } from "@iconify/react"
-// import { useGetAllUserQuery, useUpdateUserMutation } from "@/redux/api/userApi"
 import dayjs from "dayjs"
-// import catchAsync from "@/utils/catchAsync"
-// import { toast } from "react-toastify"
 import CustomConfirm from "@/components/CustomConfirm"
 import CustomAvatar from "@/components/CustomAvatar"
-// import { usePathname, useRouter, useSearchParams } from "next/navigation"
-// import useQueryString from "@/hooks/useQueryString"
-import userImg from "@/assets/images/user.png"
 import { Flex, Input } from "antd"
 import UserProfileModal from "./UserProfileModal"
+import {
+  useGetAllUsersQuery,
+  useUpdateUserStatusMutation,
+} from "@/redux/apis/userApi"
+import ErrorComponent from "../skeletons/ErrorComponent"
+import handleMutation from "@/utils/handleMutation"
 const { Search } = Input
 
 export interface IUser {
-  key: number
+  _id: string
   name: string
-  age: number
-  address: string
   email: string
-  gender: "male" | "female" | "other"
-  contactNumber: string
-  status: string
-  createdAt: string
   photoUrl: string
-  primaryPosition: string
-  secondaryPosition: string
+  status: "active" | "blocked"
+  id: string
+  createdAt: string
 }
 
-//! Dummy user data
-const users: IUser[] = Array.from({ length: 10 }).map((_, index) => ({
-  key: index + 1,
-  name: "Edward Liu",
-  age: 32,
-  address: "London, Park Lane no. 2",
-  email: "ZwNQk@example.com",
-  contactNumber: "1234567890",
-  status: "active",
-  gender: "male",
-  createdAt: dayjs().format("YYYY-MM-DD"),
-  photoUrl: userImg?.src,
-  primaryPosition: "GoalKeeper",
-  secondaryPosition: "Rotations",
-}))
-
-const UsersTable = () => {
-  // const router = useRouter()
-  // const currentPathname = usePathname()
-  // const { createQueryString } = useQueryString()
+const UsersTable = ({
+  limit = 10,
+  pagination = true,
+  heading,
+}: {
+  limit?: number
+  pagination?: boolean
+  heading?: string
+}) => {
   const [searchText, setSearchText] = useState("")
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<IUser>()
-
-  // Get Recent Users
-  // const { data: users, isLoading: isGetAllUsersLoading } = useGetAllUserQuery()
+  const [page, setPage] = useState(1)
+  const params = {
+    searchTerm: searchText,
+    limit,
+    page,
+  }
 
   // Block User
-  // const [blockUser] = useUpdateUserMutation()
+  const [updateStatus] = useUpdateUserStatusMutation()
 
-  // const handleBlockUser = async (userId, currentStatus) => {
-  //   await catchAsync(async () => {
-  //     const status = currentStatus === "active" ? "blocked" : "active"
+  const handleBlockUser = async (
+    userId: string,
+    currentStatus: "active" | "blocked",
+  ) => {
+    const status = currentStatus === "active" ? "blocked" : "active"
 
-  //     await blockUser({ userId, status }).unwrap()
-  //     toast.success(
-  //       currentStatus === "active"
-  //         ? "User blocked successfully"
-  //         : "User unblocked successfully",
-  //     )
-  //   })
-  // }
+    const payload = {
+      userId,
+      status,
+    }
+    handleMutation(payload, updateStatus, "Updating status...")
+  }
+
+  // Get Recent Users
+  const { data, isLoading, isError, error, refetch } =
+    useGetAllUsersQuery(params)
+  const users = data?.data
+
+  const meta = data?.meta
+  if (isError)
+    return (
+      <ErrorComponent
+        message={(error as any)?.data?.message}
+        onRetry={refetch}
+        className="flex h-[65vh] items-center justify-center"
+      />
+    )
 
   // =============== Table columns ===============
   const columns: TableProps<IUser>["columns"] = [
@@ -99,10 +100,6 @@ const UsersTable = () => {
     {
       title: "Email",
       dataIndex: "email",
-    },
-    {
-      title: "Contact",
-      dataIndex: "contactNumber",
     },
     {
       title: "Registered At",
@@ -146,7 +143,7 @@ const UsersTable = () => {
           <CustomConfirm
             title="Are you sure?"
             description="This user's status will be updated."
-            // onConfirm={() => handleBlockUser(record?._id, record?.status)}
+            onConfirm={() => handleBlockUser(record?._id, record?.status)}
           >
             <Tooltip
               title={
@@ -178,9 +175,11 @@ const UsersTable = () => {
 
   console.log({ searchText })
   return (
-    <div className="bg-secondary min-h-[85vh] space-y-5 rounded-xl p-5 pb-0">
+    <div className="bg-secondary h-fit space-y-5 rounded-xl p-5">
       <Flex justify="between" align="center">
-        <h4 className="flex-1 text-2xl font-semibold">User Management</h4>
+        <h4 className="flex-1 text-2xl font-semibold">
+          {heading || "User Management"}
+        </h4>
 
         <Search
           placeholder="Search by user id, name or email..."
@@ -195,26 +194,23 @@ const UsersTable = () => {
 
       <div className="my-5">
         <Table
-          // loading={isGetAllUsersLoading}
+          loading={isLoading}
           style={{ overflowX: "auto" }}
           columns={columns}
           dataSource={users}
           scroll={{ x: "100%" }}
-          // pagination={{
-          //   pageSize: 10,
-          //   current: useSearchParams().get("page") || 1,
-          //   onChange: (page, pageSize) => {
-          //     router.push(
-          //       currentPathname +
-          //         "?" +
-          //         createQueryString({
-          //           page,
-          //           pageSize,
-          //         }),
-          //     )
-          //   },
-          // }}
-          rowKey={(record) => record?.key}
+          pagination={
+            pagination && meta?.total > limit
+              ? {
+                  pageSize: limit,
+                  current: page,
+                  total: meta?.total,
+                  onChange: (page) => {
+                    setPage(page)
+                  },
+                }
+              : false
+          }
         ></Table>
       </div>
 
