@@ -1,34 +1,35 @@
 import CustomAvatar from "@/components/CustomAvatar"
 import { StaticImageData } from "next/image"
 
-interface User {
+interface Chat {
   img: StaticImageData
   name: string
   latestMsg: string
 }
 
-interface UserCardProps {
-  user: User
+interface ChatCardProps {
+  chat: Chat
   active: boolean
 }
 
-const UserCard = ({ user, active }: UserCardProps) => {
-  const { img, name, latestMsg } = user
+const ChatCard = ({ chat, active }: ChatCardProps) => {
+  const { img, name, latestMsg } = chat
 
   return (
     <div
-      className={`flex-center-start gap-x-3 px-2 py-3 ${
-        active ? "bg-primary rounded-xl text-white" : "text-black"
+      className={`flex-center-start cursor-pointer gap-x-3 px-2 py-3 ${
+        active && "bg-primary rounded-xl text-white"
       }`}
     >
       <CustomAvatar src={img.src} name={name} size={60} />
-
       <div className="flex-grow space-y-1">
         <div className="flex items-center justify-between">
           <h4 className="text-xl font-medium">{name}</h4>
-          {!active && (
-            <p className="text-sm font-medium text-gray-500">12m ago</p>
-          )}
+          <p
+            className={`text-sm ${active ? "text-white" : "text-gray-400"}`}
+          >
+            12m ago
+          </p>
         </div>
         <p className="text-ellipsis">{latestMsg}</p>
       </div>
@@ -36,4 +37,4 @@ const UserCard = ({ user, active }: UserCardProps) => {
   )
 }
 
-export default UserCard
+export default ChatCard

@@ -3,20 +3,50 @@
 import Image from "next/image"
 import userImg from "@/assets/images/message/user.png"
 import user2Img from "@/assets/images/message/user2.jpg"
-import UserCard from "./UserCard"
-import ReceiverMsgCard from "./ReceiverMsgCard"
-import OwnerMsgCard from "./OwnerMsgCard"
+import UserCard from "./ChatCard"
 import { Button } from "antd"
 import { Input } from "antd"
 import { Icon } from "@iconify/react/dist/iconify.js"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import ReceivedMessage from "./ReceivedMessage"
+import OwnerMsgCard from "./OwnerMsgCard"
+
+export const dummyChats = [
+  { img: userImg, name: "Alice Martin", latestMsg: "Let’s sync tomorrow." },
+  { img: userImg, name: "Ben Carter", latestMsg: "Got the files, thanks!" },
+  { img: userImg, name: "Clara Lee", latestMsg: "Call me when you’re free." },
+  { img: userImg, name: "Derek Chan", latestMsg: "Sure, I’m in." },
+  { img: userImg, name: "Eva Gomez", latestMsg: "Love the new design!" },
+  { img: userImg, name: "Finn Harper", latestMsg: "Almost done with it." },
+  { img: userImg, name: "Grace Liu", latestMsg: "Let’s review together." },
+  { img: userImg, name: "Hassan Malik", latestMsg: "That’s awesome news!" },
+  { img: userImg, name: "Ivy Thompson", latestMsg: "All set for launch." },
+  { img: userImg, name: "Jack Nguyen", latestMsg: "Ping me anytime." },
+  { img: userImg, name: "Kira Patel", latestMsg: "See you on Monday." },
+  { img: userImg, name: "Leo Zhang", latestMsg: "Sent you the notes." },
+]
 
 const { Search } = Input
 
 const MessageContainer = () => {
+  const params = useSearchParams()
+  const router = useRouter()
+  const [activeChat, setActiveChat] = useState(0)
+  useEffect(() => {
+    const activeChat = params.get("activeChat")
+    setActiveChat(Number(activeChat))
+  }, [params])
+  const handleChangeActiveChat = (idx: number) => {
+    router.push(`/message?activeChat=${idx}`)
+    setActiveChat(idx)
+  }
+
+  const activeChatData = dummyChats[activeChat]
   return (
     <div className="lg:mx-auto">
       <div
-        className="relative z-10 flex flex-col rounded-xl bg-white !px-8 py-6 shadow-lg lg:flex-row"
+        className="bg-secondary relative z-10 flex max-h-[85vh] flex-col overflow-y-hidden rounded-xl !px-8 py-6 text-white shadow-lg lg:flex-row"
         style={{
           borderTop: "8px solid var(--primary)",
           borderTopLeftRadius: "1rem",
@@ -25,7 +55,7 @@ const MessageContainer = () => {
       >
         {/* left */}
         <div className="pr-8 lg:w-[30%] lg:border-r lg:border-gray-300">
-          <div className="gray-300 flex items-end gap-x-5 border-b border-gray-300 py-4 text-black">
+          <div className="gray-300 flex items-end gap-x-5 border-b border-gray-300 py-4">
             <h4 className="text-2xl font-bold">Messages</h4>
             <p className="pb-1 font-semibold">12</p>
           </div>
@@ -43,17 +73,11 @@ const MessageContainer = () => {
             />
 
             {/* users list - TODO: Use dynamic data */}
-            <div className="scroll-hide mt-4 max-h-[80vh] space-y-4 overflow-auto">
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <UserCard
-                  key={idx}
-                  user={{
-                    img: userImg,
-                    name: "Elmer Laverty",
-                    latestMsg: "omg, this is amazing 🔥",
-                  }}
-                  active={idx === 1 ? true : false}
-                />
+            <div className="scroll-hide mt-4 max-h-[85vh] space-y-4 overflow-y-scroll pb-44">
+              {dummyChats.map((chat, idx) => (
+                <div onClick={() => handleChangeActiveChat(idx)} key={idx}>
+                  <UserCard chat={chat} active={activeChat === idx} />
+                </div>
               ))}
             </div>
           </div>
@@ -65,21 +89,19 @@ const MessageContainer = () => {
             <div className="flex items-center gap-x-3">
               <div className="w-[60px]">
                 <Image
-                  src={userImg}
+                  src={activeChatData.img}
                   alt="user image"
                   className="aspect-square w-full rounded-full"
                 />
               </div>
 
               <div className="lg:flex-grow">
-                <h3 className="text-xl font-semibold text-black">
-                  Elmer Laverty
-                </h3>
+                <h3 className="text-xl font-semibold">{activeChatData.name}</h3>
 
                 <div className="mt-1 flex items-center gap-x-2">
                   {/* Active/Online Indicator */}
                   <div className="h-2 w-2 rounded-full bg-green-500" />
-                  <p className="border-t-black text-black">Online</p>
+                  <p className="border-t-black">Online</p>
                 </div>
               </div>
             </div>
@@ -91,7 +113,7 @@ const MessageContainer = () => {
                 width={20}
                 color="#d55758"
               />
-              <p className="text-xl text-black">Block</p>
+              <p className="text-xl">Block</p>
             </button>
           </div>
 
@@ -103,9 +125,9 @@ const MessageContainer = () => {
                 className="h-[50px] w-[50px] rounded-full"
               />
               <div className="max-w-[50%] space-y-3 overflow-hidden">
-                <ReceiverMsgCard message={"omg, this is amazing"} />
-                <ReceiverMsgCard message={"Lorem ipsum dolor sit amet"} />
-                <ReceiverMsgCard
+                <ReceivedMessage message={"omg, this is amazing"} />
+                <ReceivedMessage message={"Lorem ipsum dolor sit amet"} />
+                <ReceivedMessage
                   message={
                     "omg, thi perspiciatis consectetur mollitia laboriosam itaque enim officia aut nemo quibusdam?"
                   }
@@ -136,9 +158,9 @@ const MessageContainer = () => {
                 className="h-[50px] w-[50px] rounded-full"
               />
               <div className="max-w-[50%] space-y-3">
-                <ReceiverMsgCard message={"omg, this is amazing"} />
-                <ReceiverMsgCard message={"Lorem ipsum dolor sit amet"} />
-                <ReceiverMsgCard
+                <ReceivedMessage message={"omg, this is amazing"} />
+                <ReceivedMessage message={"Lorem ipsum dolor sit amet"} />
+                <ReceivedMessage
                   message={
                     "omg, thi perspiciatis consectetur mollitia laboriosam itaque enim officia aut nemo quibusdam?"
                   }
@@ -161,7 +183,7 @@ const MessageContainer = () => {
                 size="large"
                 placeholder="Type a message"
                 type="text"
-                className="w-full !rounded-full border !px-4 !py-2 !text-black"
+                className="w-full !rounded-full border !px-4 !py-2"
               />
 
               <Button

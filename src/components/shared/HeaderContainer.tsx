@@ -12,7 +12,7 @@ import { useAppSelector } from "@/redux/hooks"
 import { selectUser } from "@/redux/slices/authSlice"
 import { useGetNotificationsQuery } from "@/redux/apis/notificationApi"
 import { format } from "date-fns"
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 const { Header } = Layout
 
@@ -27,9 +27,11 @@ export default function HeaderContainer({
 }: HeaderContainerProps) {
   const [page, setPage] = useState(1)
   const limit = 5
-  const observerRef = useRef<HTMLDivElement>(null)
 
-  const { data: notificationRes, isFetching } = useGetNotificationsQuery({ page, limit })
+  const { data: notificationRes, isFetching } = useGetNotificationsQuery({
+    page,
+    limit,
+  })
   const notifications = notificationRes?.data || []
 
   const pathname = usePathname()
@@ -54,7 +56,7 @@ export default function HeaderContainer({
       {notifications.map((notification: any) => (
         <div
           key={notification.id}
-          className="p-3 border-b border-gray-700 text-start"
+          className="border-b border-gray-700 p-3 text-start"
         >
           <div className="flex items-center gap-x-3">
             <Icon
@@ -74,7 +76,9 @@ export default function HeaderContainer({
       ))}
 
       {isFetching && (
-        <p className="text-center text-xs text-gray-400 py-2">Loading more...</p>
+        <p className="py-2 text-center text-xs text-gray-400">
+          Loading more...
+        </p>
       )}
     </div>
   )
@@ -114,7 +118,11 @@ export default function HeaderContainer({
 
       {/* Right --- notification, user profile */}
       <Flex align="center" justify="start" gap={10}>
-        <Popover content={notificationContent} trigger="click" placement="bottomRight">
+        <Popover
+          content={notificationContent}
+          trigger="click"
+          placement="bottomRight"
+        >
           <button className="flex-center bg-primary relative aspect-square size-11 rounded-full !leading-none">
             <div className="absolute top-2 right-3 size-3 rounded-full bg-red-400" />
             <Icon
