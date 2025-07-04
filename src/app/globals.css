@@ -201,3 +201,28 @@ body {
 .react-player__preview {
   border-radius: 12px;
 }
+
+/* ╔══════════════════════════════════╗
+   ║   Custom scrollbar – no track    ║
+   ╚══════════════════════════════════╝ */
+
+.scrollbar-no-bg {
+  /* Firefox */
+  scrollbar-width: thin; /* size */
+  scrollbar-color: var(--scroll-thumb, #888) transparent;
+}
+
+/* Chrome / Safari / Edge (WebKit) */
+.scroll-no-bg::-webkit-scrollbar {
+  width: 8px; /* ↔ horizontal? use height here */
+  background: transparent;
+}
+
+.scroll-no-bg::-webkit-scrollbar-thumb {
+  background-color: var(--scroll-thumb, #888); /* thumb colour */
+  border-radius: 4px;
+}
+
+.scroll-no-bg::-webkit-scrollbar-track {
+  background: transparent; /* hide track / “bg” */
+}

@@ -1,37 +1,44 @@
 import CustomAvatar from "@/components/CustomAvatar"
-import { StaticImageData } from "next/image"
-
-interface Chat {
-  img: StaticImageData
-  name: string
-  latestMsg: string
-}
+import { timeAgo } from "@/utils/timeAgo"
 
 interface ChatCardProps {
-  chat: Chat
+  data: any
   active: boolean
+  unreadMessageCount?: number
 }
 
-const ChatCard = ({ chat, active }: ChatCardProps) => {
-  const { img, name, latestMsg } = chat
-
+const ChatCard = ({ data, active }: ChatCardProps) => {
+  const { chat, message, unreadMessageCount } = data
+  const user = chat?.participants[0]
+  const isRead = message?.seen || active
   return (
     <div
       className={`flex-center-start cursor-pointer gap-x-3 px-2 py-3 ${
         active && "bg-primary rounded-xl text-white"
       }`}
     >
-      <CustomAvatar src={img.src} name={name} size={60} />
+      <CustomAvatar src={user?.photoUrl} name={user?.name} size={60} />
       <div className="flex-grow space-y-1">
         <div className="flex items-center justify-between">
-          <h4 className="text-xl font-medium">{name}</h4>
-          <p
-            className={`text-sm ${active ? "text-white" : "text-gray-400"}`}
-          >
-            12m ago
-          </p>
+          <h4 className={`text-xl ${isRead ? "font-normal" : "font-bold"}`}>
+            {user?.name || "Unknown User"}
+          </h4>
+          <div className="relative -mt-2 flex h-full flex-col items-end justify-between">
+            <p className={`text-sm ${active ? "text-white" : "text-gray-400"}`}>
+              {timeAgo(message?.createdAt)}
+            </p>
+            {!active && unreadMessageCount > 0 && (
+              <p
+                className={`bg-primary absolute top-8 flex h-[22px] w-[22px] items-center justify-center rounded-full text-[12px]`}
+              >
+                {unreadMessageCount}
+              </p>
+            )}
+          </div>
         </div>
-        <p className="text-ellipsis">{latestMsg}</p>
+        <p className={`text-ellipsis ${isRead ? "font-normal" : "font-bold"}`}>
+          {message?.text?.slice(0, 35)}...
+        </p>
       </div>
     </div>
   )
