@@ -9,16 +9,25 @@ import { usePathname, useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 import Image from "next/image"
 import { Icon } from "@iconify/react"
-// import { logout } from '@/redux/features/authSlice'
-// import { useDispatch } from 'react-redux'
+import { useAppDispatch } from "@/redux/hooks"
+import { logOut } from "@/redux/slices/authSlice"
 
 interface SidebarContainerProps {
   collapsed: boolean
 }
 
 const SidebarContainer: React.FC<SidebarContainerProps> = ({ collapsed }) => {
-  // const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const router = useRouter()
+  const pathname = usePathname()
+
+  const handleLogout = (key: string) => {
+    if (key === "logout") {
+      dispatch(logOut())
+      toast.success("Logged out successfully")
+      router.push(`/auth/login?redirect=${pathname}`)
+    }
+  }
 
   const sidebarLinks = [
     {
@@ -39,7 +48,7 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({ collapsed }) => {
     {
       key: "subscription",
       icon: <Icon icon="ri:money-dollar-circle-line" height={26} width={26} />,
-      label: "Subscription",
+      label: <Link href={"/subscription"}>Subscription</Link>,
     },
     {
       key: "videos",
@@ -80,17 +89,6 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({ collapsed }) => {
     },
   ]
 
-  // Logout handler
-  const onClick = (key: string) => {
-    if (key === "logout") {
-      // dispatch(logout())
-      // router.refresh()
-      router.push("/login")
-
-      toast.success("Successfully Logged Out!")
-    }
-  }
-
   // Get current path for sidebar menu item `key`
   const currentPathname = usePathname()?.replace("/", "")
 
@@ -116,7 +114,7 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({ collapsed }) => {
       </div>
 
       <Menu
-        onClick={({ key }) => onClick(key)}
+        onClick={({ key }) => handleLogout(key)}
         defaultSelectedKeys={[currentPathname]}
         mode="inline"
         className="sidebar-menu !space-y-4 !border-none !bg-transparent"

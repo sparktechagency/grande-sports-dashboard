@@ -1,22 +1,74 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse, NextRequest } from "next/server"
+import { jwtDecode } from "jwt-decode"
 
-// This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-  console.log("Middleware request: ", request)
-  return NextResponse.next();
+const PROTECTED_PATHS = [
+  "/dashboard",
+  "/users",
+  "/earning",
+  "/subscription",
+  "/videos/playlist",
+  "/videos/upload",
+  "/community",
+  "/message",
+  "/settings",
+  "/profile",
+  "/privacy-policy",
+  "/terms-conditions",
+  "/about-us",
+]
+
+const AUTH_PATH = /^\/auth(\/.*)?$/
+
+interface DecodedUser {
+  _id: string
+  email: string
+  role: string
+  iat: number
+  exp: number
 }
 
-// See "Matching Paths" below to learn more
+export function middleware(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl
+  const token = request.cookies.get("grandSportsAccessToken")?.value
+
+  let isAuthenticated = false
+  let decodedUser: DecodedUser | null = null
+
+  if (token) {
+    try {
+      decodedUser = jwtDecode<DecodedUser>(token)
+      const currentTime = Math.floor(Date.now() / 1000)
+      if (decodedUser.exp > currentTime && decodedUser.role === "admin") {
+        isAuthenticated = true
+      }
+    } catch {
+      // invalid token
+    }
+  }
+
+  // Check if current pathname is protected
+  const isProtected = PROTECTED_PATHS.some((path) =>
+    pathname === path || pathname.startsWith(path + "/")
+  )
+
+  if (isProtected && !isAuthenticated) {
+    // Redirect to login with redirect param
+    const loginUrl = new URL("/auth/login", request.url)
+    loginUrl.searchParams.set(
+      "redirect",
+      pathname + (searchParams.toString() ? `?${searchParams}` : "")
+    )
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Prevent logged-in admins from accessing /auth routes
+  if (AUTH_PATH.test(pathname) && isAuthenticated) {
+    return NextResponse.redirect(new URL("/dashboard", request.url))
+  }
+
+  return NextResponse.next()
+}
+
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
-  ],
+  matcher: ["/auth/:path*", ...PROTECTED_PATHS.map((path) => path + "/:path*"), ...PROTECTED_PATHS],
 }

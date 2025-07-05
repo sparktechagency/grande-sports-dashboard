@@ -1,11 +1,11 @@
-import { ThemeConfig } from "antd";
+import { ThemeConfig } from "antd"
 
 const mainTheme: ThemeConfig = {
   token: {
     colorPrimary: "#067A3A",
     colorInfo: "#067A3A",
     colorError: "#ca0b00",
-    fontFamily: "var(--font-poppins)"
+    fontFamily: "var(--font-poppins)",
   },
 
   components: {
@@ -17,7 +17,7 @@ const mainTheme: ThemeConfig = {
       itemSelectedColor: "#ffffff",
       iconSize: 17,
       subMenuItemBg: "rgba(0,0,0,0.3)",
-      colorBgElevated: "rgb(0,0,0)"
+      colorBgElevated: "rgb(0,0,0)",
     },
 
     Table: {
@@ -48,19 +48,20 @@ const mainTheme: ThemeConfig = {
       colorTextPlaceholder: "lightGray",
       colorTextDisabled: "gray",
       colorIcon: "#fff",
-      colorIconHover: "gray"
+      colorIconHover: "gray",
     },
     Select: {
       colorBorder: "#a2a2a3",
       colorText: "#fff",
+      colorBgElevated: "#000",
       colorBgContainer: "transparent",
-      colorTextPlaceholder: "lightGray"
+      colorTextPlaceholder: "lightGray",
     },
 
     DatePicker: {
       controlHeight: 40,
       colorBorder: "var(--secondary)",
-      colorText: "#000"
+      colorText: "#000",
     },
 
     Modal: {
@@ -70,26 +71,25 @@ const mainTheme: ThemeConfig = {
       titleColor: "#fff",
       colorText: "#fff",
       colorIcon: "#fff",
-      colorIconHover: "var(--danger)"
+      colorIconHover: "var(--danger)",
     },
     Form: {
       labelColor: "#fff",
       colorText: "#fff",
-      colorTextDisabled: "gray"
+      colorTextDisabled: "gray",
     },
 
     Pagination: {
       itemActiveBg: "var(--primary)",
       itemBg: "var(--secondary)",
       colorText: "#fff",
-      colorPrimary: "#fff"
+      colorPrimary: "#fff",
     },
 
     Tabs: {
-      colorText: "#fff"
-    }
+      colorText: "#fff",
+    },
   },
-};
+}
 
-
-export default mainTheme;
+export default mainTheme

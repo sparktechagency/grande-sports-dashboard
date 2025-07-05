@@ -2,23 +2,33 @@
 
 import FormWrapper from "@/components/form-components/FormWrapper"
 import UInput from "@/components/form-components/UInput"
+import { useUpdateProfileMutation } from "@/redux/apis/userApi"
+import handleMutation from "@/utils/handleMutation"
 import { Button } from "antd"
 import { FieldValues, SubmitHandler } from "react-hook-form"
 
-export default function EditProfileForm() {
+export default function EditProfileForm({
+  name,
+  email,
+  contact,
+}: {
+  name: string
+  email: string
+  contact: string
+}) {
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation()
   const handleSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data)
+    handleMutation(data, updateProfile, "Saving...")
   }
-
   return (
     <section className="mt-5 px-10">
       <FormWrapper
         onSubmit={handleSubmit}
         // resolver={zodResolver(editProfileSchema)}
         defaultValues={{
-          name: "Miguel",
-          email: "miguel@gmail.com",
-          contact: "+1234567890",
+          name: name,
+          email: email,
+          contact: contact,
         }}
       >
         <UInput
@@ -40,8 +50,9 @@ export default function EditProfileForm() {
           className="w-full"
           size="large"
           type="primary"
+          disabled={isLoading}
         >
-          Save
+          {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </FormWrapper>
     </section>

@@ -5,15 +5,19 @@ import mainTheme from "@/theme/mainTheme"
 import { AntdRegistry } from "@ant-design/nextjs-registry"
 import { ConfigProvider } from "antd"
 import { Bounce, ToastContainer } from "react-toastify"
+import { Provider as ReduxProvider } from "react-redux"
+import { store } from "@/redux/store"
 
 const Provider: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <ConfigProvider theme={mainTheme}>
-      <AntdRegistry>{children}</AntdRegistry>
+      <ReduxProvider store={store}>
+        <AntdRegistry>{children}</AntdRegistry>
+      </ReduxProvider>
 
       <ToastContainer
         position="top-right"
-        autoClose={2700}
+        autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick={false}

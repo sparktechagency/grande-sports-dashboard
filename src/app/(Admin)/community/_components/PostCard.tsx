@@ -1,24 +1,35 @@
 import CustomAvatar from "@/components/CustomAvatar"
-import { Button, Flex } from "antd"
-import { IPost } from "../page"
+import { Flex } from "antd"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-import { Icon } from "@iconify/react"
+import Image from "next/image"
+import { Pencil, Trash2 } from "lucide-react"
+import CustomConfirm from "@/components/CustomConfirm"
+import { useDeletePostMutation } from "@/redux/apis/postApi"
+import handleMutation from "@/utils/handleMutation"
+import { useState } from "react"
+import EditPostModal from "./EditPostModal"
 // import Player from "next-video/player"
 
 dayjs.extend(relativeTime)
 
 interface PostCardProps {
-  post: IPost
+  post: any
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  const [showEditModal, setShowEditModal] = useState(false)
+
+  const [deletePost] = useDeletePostMutation()
+  const handleDelete = () => {
+    handleMutation(post?._id, deletePost, "Post is being deleted...")
+  }
   return (
     <div className="bg-secondary h-auto w-full rounded-xl border border-gray-300 p-5">
       <Flex align="center" justify="space-between">
         <Flex align="start" gap={8}>
           <CustomAvatar
-            src={post?.user?.profilePicture}
+            src={post?.user?.photoUrl}
             name={post?.user?.name}
             size={45}
           />
@@ -32,34 +43,47 @@ export default function PostCard({ post }: PostCardProps) {
         </Flex>
 
         <Flex align="center" gap={8}>
-          <Button
-            type="primary"
-            variant="outlined"
-            icon={<Icon icon="tdesign:edit" height={22} width={22} />}
-          />
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="bg-primary rounded-md p-2"
+          >
+            <Pencil size={16} />
+          </button>
 
-          <Button
-            variant="solid"
-            color="danger"
-            icon={<Icon icon="iconamoon:trash-light" height={22} width={22} />}
-          />
+          <CustomConfirm onConfirm={handleDelete} title="Delete Post">
+            <button className="rounded-md bg-red-600 p-2">
+              <Trash2 size={16} />
+            </button>
+          </CustomConfirm>
         </Flex>
       </Flex>
 
       <div className="mt-5 space-y-4">
-        <article className="">{post?.content?.text}</article>
+        <article className="whitespace-pre-wrap text-white">
+          {post?.description}
+        </article>
 
-        <iframe
-          width="100%"
-          height="600"
-          src="https://www.youtube.com/embed/2KWMoLr9aPY?si=Iva8zkx0ybIlp3nI"
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
-        ></iframe>
+        {post?.content?.includes("/videos") ? (
+          <video
+            src={post?.content}
+            controls
+            className="max-h-[500px] w-full rounded-xl object-cover"
+          />
+        ) : (
+          <Image
+            src={post?.content}
+            width={1000}
+            height={600}
+            alt={post.description || "Post media"}
+            className="max-h-[500px] w-full rounded-xl object-cover"
+          />
+        )}
       </div>
+      <EditPostModal
+        open={showEditModal}
+        setOpen={setShowEditModal}
+        post={post}
+      />
     </div>
   )
 }

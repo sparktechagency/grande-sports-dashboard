@@ -1,4 +1,4 @@
-'use client' // Error boundaries must be Client Components
+"use client" // Error boundaries must be Client Components
 
 export default function GlobalError({
   error,
@@ -7,7 +7,7 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  console.error('Global Error ============>', error)
+  console.error("Global Error ============>", error)
 
   return (
     // global-error must include html and body tags

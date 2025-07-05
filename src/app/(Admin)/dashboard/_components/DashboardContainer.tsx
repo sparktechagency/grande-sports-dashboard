@@ -6,38 +6,10 @@ import { Flex } from "antd"
 import { useState } from "react"
 import UsersChart from "./charts/UsersChart"
 import EarningChart from "./charts/EarningChart"
-import RecentUserTable from "./RecentUserTable"
-
-//! Dummy Chart Data - Remove in production
-const usersData = [
-  { month: "Jan", count: 100 },
-  { month: "Feb", count: 120 },
-  { month: "Mar", count: 90 },
-  { month: "Apr", count: 110 },
-  { month: "May", count: 130 },
-  { month: "Jun", count: 150 },
-  { month: "Jul", count: 140 },
-  { month: "Aug", count: 160 },
-  { month: "Sep", count: 180 },
-  { month: "Oct", count: 170 },
-  { month: "Nov", count: 190 },
-  { month: "Dec", count: 200 },
-]
-
-const earningsData = [
-  { month: "Jan", amount: 100 },
-  { month: "Feb", amount: 120 },
-  { month: "Mar", amount: 90 },
-  { month: "Apr", amount: 110 },
-  { month: "May", amount: 130 },
-  { month: "Jun", amount: 150 },
-  { month: "Jul", amount: 140 },
-  { month: "Aug", amount: 160 },
-  { month: "Sep", amount: 180 },
-  { month: "Oct", amount: 170 },
-  { month: "Nov", amount: 190 },
-  { month: "Dec", amount: 200 },
-]
+import { useGetMetaDataQuery } from "@/redux/apis/metaApi"
+import Spinner from "@/components/skeletons/Spinner"
+import ErrorComponent from "@/components/skeletons/ErrorComponent"
+import UsersTable from "@/components/shared/UsersTable"
 
 const DashboardContainer = () => {
   const [selectedUserYear, setSelectedUserYear] = useState<string>(
@@ -47,26 +19,46 @@ const DashboardContainer = () => {
     new Date().getFullYear().toString(),
   )
 
-  console.log({ selectedEarningYear, selectedUserYear })
+  
+  
 
+  const params = {
+    earning_year: selectedEarningYear,
+    user_year: selectedUserYear,
+  }
+  const { data, isLoading, isError, error, refetch } =
+    useGetMetaDataQuery(params)
+  const metaData = data?.data
+  const earningOverview = metaData?.earningOverview
+  const userOverview = metaData?.userOverview
+
+  if (isLoading) return <Spinner />
+  if (isError)
+    return (
+      <ErrorComponent
+        message={(error as any)?.data?.message}
+        onRetry={refetch}
+        className="flex h-[65vh] items-center justify-center"
+      />
+    )
   // Dashboard Stats
   const dashboardStats = [
     {
       key: "users",
       label: "Total Users",
-      value: 119,
+      value: metaData?.totalUserCount || 0,
       icon: "clarity:users-line",
     },
     {
       key: "videos",
       label: "Total Videos",
-      value: 80,
+      value: metaData?.totalVideos || 0,
       icon: "tdesign:video",
     },
     {
       key: "earnings",
       label: "Total Earning",
-      value: 2599,
+      value: metaData?.totalRevenue || 0,
       icon: "ri:money-dollar-circle-line",
     },
   ]
@@ -102,18 +94,18 @@ const DashboardContainer = () => {
       {/* Charts */}
       <section className="flex-center-between my-10 flex-col gap-6 xl:flex-row">
         <UsersChart
-          data={usersData}
+          data={userOverview}
           setSelectedUserYear={setSelectedUserYear}
         />
 
         <EarningChart
-          data={earningsData}
+          data={earningOverview}
           setSelectedEarningYear={setSelectedEarningYear}
         />
       </section>
 
       {/* Recent Users Table */}
-      <RecentUserTable />
+      <UsersTable heading="Recent Users" limit={5} pagination={false} />
     </div>
   )
 }

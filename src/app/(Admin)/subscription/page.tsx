@@ -4,6 +4,9 @@ import { lazy, useState } from "react"
 import { Button, Divider, Flex } from "antd"
 import { Icon } from "@iconify/react"
 import SubscriptionPlanCard from "./_components/SubscriptionPlanCard"
+import { useGetAllPackagesQuery } from "@/redux/apis/packageApi"
+import Spinner from "@/components/skeletons/Spinner"
+import ErrorComponent from "@/components/skeletons/ErrorComponent"
 
 const CreateSubscriptionModal = lazy(
   () => import("./_components/CreateSubscriptionModal"),
@@ -13,45 +16,36 @@ const GiftSubscriptionModal = lazy(
 )
 
 export interface ISubscriptionPlan {
-  key: number
-  name: string
+  _id: string
+  title: string
+  subtitle: string
+  billingCycle: string
+  description: string[]
   price: number
-  features: string[]
-  mostPopular: boolean
+  popularity: number
+  isDeleted: boolean
+  createdAt: string
+  updatedAt: string
 }
-
-//! Dummy subscriptions data
-const subscriptionPlans: ISubscriptionPlan[] = [
-  {
-    key: 1,
-    name: "Monthly",
-    price: 30,
-    features: [
-      "Get special notifications",
-      "Get tournament updates",
-      "Create specific profile",
-    ],
-    mostPopular: true,
-  },
-  {
-    key: 1,
-    name: "Yearly",
-    price: 1200,
-    features: [
-      "Get special notifications",
-      "Get tournament updates",
-      "Create specific profile",
-      "Enjoy premium features",
-    ],
-    mostPopular: false,
-  },
-]
 
 export default function Subscriptions() {
   const [showCreateSubscriptionModal, setShowCreateSubscriptionModal] =
     useState<boolean>(false)
   const [showGiftSubscriptionModal, setShowGiftSubscriptionModal] =
     useState<boolean>(false)
+
+  const { data, isLoading, isError, error, refetch } =
+    useGetAllPackagesQuery("")
+  const packages = data?.data || []
+  if (isLoading) return <Spinner />
+  if (isError)
+    return (
+      <ErrorComponent
+        message={(error as any)?.data?.message}
+        onRetry={refetch}
+        className="flex h-[65vh] items-center justify-center"
+      />
+    )
 
   return (
     <div className="bg-secondary min-h-[85vh] space-y-5 rounded-xl px-6 py-5 pb-0">
@@ -80,14 +74,14 @@ export default function Subscriptions() {
 
       <Divider style={{ backgroundColor: "gray", marginTop: 12 }} />
 
-      <Flex gap={16} align="stretch" justify="between">
-        {subscriptionPlans?.map((subscriptionPlan) => (
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {packages?.map((subscriptionPlan: ISubscriptionPlan) => (
           <SubscriptionPlanCard
-            key={subscriptionPlan.key}
+            key={subscriptionPlan._id}
             subscriptionPlan={subscriptionPlan}
           />
         ))}
-      </Flex>
+      </div>
 
       {/* Modals */}
       <CreateSubscriptionModal

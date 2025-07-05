@@ -51,6 +51,7 @@ const USelect = ({
             onChange={onChange}
             placeholder={placeholder}
             style={{ ...style, height: style?.height || "35px" }}
+            allowClear
           />
         </Form.Item>
       )}

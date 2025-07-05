@@ -57,6 +57,9 @@ const UsersChart = ({ data, setSelectedUserYear }: UsersChartProps) => {
         >
           <XAxis
             dataKey="month"
+            tickFormatter={(month) => {
+              return data.length > 6 ? month.slice(0, 3) : month
+            }}
             scale="point"
             padding={{ left: 10, right: 20 }}
             tickMargin={5}

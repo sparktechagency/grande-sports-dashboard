@@ -4,8 +4,8 @@ interface OwnerMsgCardProps {
 
 const OwnerMsgCard = ({ message }: OwnerMsgCardProps) => {
   return (
-    <div className="max-w-max rounded-3xl border bg-black px-3 py-2">
-      <p className="text-primaryWhite">{message}</p>
+    <div className="bg-primary rounded-md px-3 py-2 text-white first-letter:max-w-max">
+      <p className="text-primary-black">{message}</p>
     </div>
   )
 }
