@@ -173,7 +173,6 @@ const UsersTable = ({
     },
   ]
 
-  console.log({ searchText })
   return (
     <div className="bg-secondary h-fit space-y-5 rounded-xl p-5">
       <Flex justify="between" align="center">

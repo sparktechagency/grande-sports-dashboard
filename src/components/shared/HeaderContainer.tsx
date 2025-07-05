@@ -1,6 +1,6 @@
 "use client"
 
-import { Popover, Flex } from "antd"
+import { Popover, Flex, Button } from "antd"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -8,11 +8,18 @@ import { Layout } from "antd"
 import { Icon } from "@iconify/react"
 import { defaultAvatar } from "@/constant/global.constant"
 import { useGetUserProfileQuery } from "@/redux/apis/userApi"
+import {
+  useDeleteAllNotificationsMutation,
+  useGetNotificationsQuery,
+} from "@/redux/apis/notificationApi"
 import { useAppSelector } from "@/redux/hooks"
 import { selectUser } from "@/redux/slices/authSlice"
-import { useGetNotificationsQuery } from "@/redux/apis/notificationApi"
 import { format } from "date-fns"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Spinner from "../skeletons/Spinner"
+import { socket } from "@/socket"
+import handleMutation from "@/utils/handleMutation"
+import { toast } from "react-toastify"
 
 const { Header } = Layout
 
@@ -25,61 +32,144 @@ export default function HeaderContainer({
   collapsed,
   setCollapsed,
 }: HeaderContainerProps) {
-  const [page, setPage] = useState(1)
-  const limit = 5
+  const [deleteAll, { isLoading: isDeleting }] =
+    useDeleteAllNotificationsMutation()
+  const page = 1
+  const [limit, setLimit] = useState(8)
 
-  const { data: notificationRes, isFetching } = useGetNotificationsQuery({
-    page,
-    limit,
-  })
-  const notifications = notificationRes?.data || []
+  const {
+    data: notificationRes,
+    isLoading: isNotificationLoading,
+    isError: isNotificationError,
+    isFetching: isNotificationFetching,
+  } = useGetNotificationsQuery({ page, limit })
+  const notificationData = notificationRes?.data || []
+  const meta = notificationRes?.meta || {}
 
+  // set notifications in the state
+  const [notifications, setNotifications] = useState(notificationData)
+  console.log("notificationData:", notificationData)
+  useEffect(() => {
+    setNotifications(notificationData)
+  }, [notificationData])
+  // console.log("Notification Data:", notificationData)
   const pathname = usePathname()
   const navbarTitle = pathname.split("/")[1]
   const tokenUser = useAppSelector(selectUser)
   const { data } = useGetUserProfileQuery("", { skip: !tokenUser })
   const user = data?.data
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-    const el = e.currentTarget
-    const isBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10
-    if (isBottom && !isFetching) {
-      setPage((prev) => prev + 1)
+  useEffect(() => {
+    // Connect socket if not already connected
+    if (!socket.connected) {
+      socket.connect()
     }
+
+    // Listen for real-time notification event
+    socket.on(`notification::${user?._id}`, (newNotification) => {
+      toast.info(newNotification.message, {
+        autoClose: 12000,
+      })
+      console.log("Received real-time notification:", newNotification)
+      setNotifications((prev: any) => [newNotification, ...prev])
+    })
+
+    socket.on("connect", () => {
+      console.log("Socket connected")
+    })
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected")
+    })
+
+    return () => {
+      socket.off(`notification::${user?._id}`)
+      socket.off("connect")
+      socket.off("disconnect")
+      // Do not disconnect socket here to maintain connection across components
+    }
+  }, [user])
+
+  const handleLoadMore = () => {
+    setLimit((prevLimit) => prevLimit + limit)
+  }
+
+  const handleDeleteAll = async () => {
+    handleMutation(undefined, deleteAll, "Deleting all notifications...")
   }
 
   const notificationContent = (
-    <div
-      style={{ maxHeight: "300px", overflowY: "auto", width: "300px" }}
-      onScroll={handleScroll}
-    >
-      {notifications.map((notification: any) => (
-        <div
-          key={notification.id}
-          className="border-b border-gray-700 p-3 text-start"
-        >
-          <div className="flex items-center gap-x-3">
-            <Icon
-              icon="solar:bell-outline"
-              height={26}
-              width={26}
-              color="var(--primary)"
-            />
-            <div className="flex flex-col items-start">
-              <p className="text-sm font-medium">{notification.message}</p>
-              <p className="text-primary text-xs">
-                {format(new Date(notification.date), "dd MMMM, yyyy")}
-              </p>
+    <div style={{ maxHeight: "350px", overflowY: "auto", width: "300px" }}>
+      {isNotificationLoading ? (
+        <Spinner size={100} className="h-[270px]" />
+      ) : isNotificationError ? (
+        <p className="py-22 text-center text-xs text-red-500">
+          Failed to load notifications
+        </p>
+      ) : notifications.length === 0 ? (
+        <p className="py-22 text-center text-xs text-gray-400">
+          No notifications
+        </p>
+      ) : (
+        notifications.map((notification: any) => (
+          <div
+            key={notification.id}
+            className="border-b border-gray-700 p-3 text-start"
+          >
+            <div className="flex items-center gap-x-3">
+              <Icon
+                icon="solar:bell-outline"
+                height={26}
+                width={26}
+                color="var(--primary)"
+              />
+              <div className="flex flex-col items-start">
+                <p className="text-sm font-medium">
+                  {notification.message?.length > 25
+                    ? `${notification.message.slice(0, 25)}...`
+                    : notification.message}
+                </p>
+                <p className="text-primary text-xs">
+                  {format(
+                    new Date(notification.date || notification.createdAt),
+                    "dd MMMM, yyyy",
+                  )}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-
-      {isFetching && (
-        <p className="py-2 text-center text-xs text-gray-400">
-          Loading more...
-        </p>
+        ))
       )}
+      {!isNotificationLoading &&
+        !isNotificationError &&
+        notifications.length !== 0 && (
+          <div className="p-3">
+            <Flex gap={8} justify="space-between">
+              {meta?.totalPage > page && (
+                <Button
+                  type="primary"
+                  onClick={handleLoadMore}
+                  disabled={isNotificationFetching}
+                  block
+                >
+                  {isNotificationFetching ? "Loading..." : "Load More"}
+                </Button>
+              )}
+              <Button
+                type="default"
+                className="!bg-red-500 !text-white"
+                onClick={handleDeleteAll}
+                disabled={
+                  isNotificationFetching ||
+                  notifications.length === 0 ||
+                  isDeleting
+                }
+                block
+              >
+                {isDeleting ? "Deleting..." : "Delete All"}
+              </Button>
+            </Flex>
+          </div>
+        )}
     </div>
   )
 
@@ -97,7 +187,6 @@ export default function HeaderContainer({
         fontFamily: "var(--font-open-sans)",
       }}
     >
-      {/* Collapse Icon */}
       <Flex align="center" justify="start" gap={10}>
         <button>
           <Icon
@@ -108,15 +197,12 @@ export default function HeaderContainer({
             onClick={() => setCollapsed(!collapsed)}
           />
         </button>
-
         <h1 className="font-rama-gothic text-[40px] font-medium capitalize">
           {navbarTitle.length > 1
             ? navbarTitle.replaceAll("/", " ").replaceAll("-", " ")
             : "dashboard"}
         </h1>
       </Flex>
-
-      {/* Right --- notification, user profile */}
       <Flex align="center" justify="start" gap={10}>
         <Popover
           content={notificationContent}
@@ -133,8 +219,6 @@ export default function HeaderContainer({
             />
           </button>
         </Popover>
-
-        {/* User */}
         <Link
           href={"/profile"}
           className="hover:text-primary-blue group flex items-center gap-x-2 text-black"
@@ -146,7 +230,6 @@ export default function HeaderContainer({
             height={52}
             className="border-primary rounded-full border-2 p-0.5 group-hover:border"
           />
-
           <h4 className="hover:text-primary text-lg font-semibold text-white">
             {user?.name?.split(" ")[0]}
           </h4>

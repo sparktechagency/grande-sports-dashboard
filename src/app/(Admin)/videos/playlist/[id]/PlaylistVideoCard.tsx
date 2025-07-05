@@ -32,19 +32,19 @@ const PlaylistVideoCard = ({ video }: { video: TVideo }) => {
   ]
   return (
     <div className="playlistVideo flex gap-6 rounded-lg">
-      <div className="h-[200px] w-[300px]">
+      <div className="h-[210px] w-[330px]">
         <React.Suspense fallback={<Spin size="large" />}>
           <ReactPlayer
             url={video?.video}
             light={video?.thumbnail}
             playing={true}
             controls={true}
-            width={300}
-            height={200}
+            width={330}
+            height={210}
           />
         </React.Suspense>
       </div>
-      <div className="flex gap-3">
+      <div className="flex w-full justify-between gap-3">
         <div className="py-3">
           <p className="text-xl">{`${video?.description?.length > 320 ? `${video?.description?.slice(0, 320)}...` : video?.description}`}</p>
           <p className="mt-6 text-base font-medium text-gray-300">

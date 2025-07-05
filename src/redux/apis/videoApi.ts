@@ -7,7 +7,6 @@ const videoApi = baseApi.injectEndpoints({
         url: "/service-videos",
         method: "POST",
         body: formData,
-        // ✅ skip setting headers — browser handles it for FormData
       }),
       invalidatesTags: ["videos"]
     }),
@@ -36,11 +35,14 @@ const videoApi = baseApi.injectEndpoints({
       providesTags: ["videos"]
     }),
     updateVideo: builder.mutation({
-      query: ({ id, payload }) => ({
-        url: `/service-videos/${id}`,
-        method: "PUT",
-        body: payload
-      }),
+      query: ({ id, payload }) => {
+        console.log('Updating video with ID:', id, 'and payload:', payload);
+        return {
+          url: `/service-videos/${id}`,
+          method: "PUT",
+          body: payload
+        }
+      },
       invalidatesTags: ["videos"]
     }),
     deleteVideo: builder.mutation({

@@ -55,7 +55,7 @@ export default function VideosPlaylist() {
 
   return (
     <div className="bg-secondary min-h-[85vh] space-y-5 rounded-xl p-5">
-      <div className="flex flex-wrap items-center justify-start gap-x-4 gap-y-8">
+      <div className="flex flex-wrap items-center justify-start gap-x-2 gap-y-8">
         {playlistVideos.map((playlist, idx: number) => (
           <PlaylistCard key={idx} idx={idx} playlist={playlist} />
         ))}

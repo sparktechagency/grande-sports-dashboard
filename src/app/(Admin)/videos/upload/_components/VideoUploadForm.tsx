@@ -11,19 +11,29 @@ import ErrorComponent from "@/components/skeletons/ErrorComponent"
 import Spinner from "@/components/skeletons/Spinner"
 import {
   useCreatePlaylistMutation,
-  useGetPlaylistQuery,
+  useGetAllPlaylistVideosQuery,
 } from "@/redux/apis/playlistApi"
 import { FieldValues, SubmitHandler } from "react-hook-form"
 import { useAddVideoMutation } from "@/redux/apis/videoApi"
 import handleMutation from "@/utils/handleMutation"
+import { useAppSelector } from "@/redux/hooks"
+import { selectUser } from "@/redux/slices/authSlice"
+import { TPlaylist } from "../../playlist/page"
 
 export default function VideoUploadForm() {
+  const user = useAppSelector(selectUser)
   const [activeTab, setActiveTab] = useState("selectPlaylist")
   const [addVideo, { isLoading: isAdding }] = useAddVideoMutation()
   const [createPlaylist, { isLoading: isCreatingPlaylist }] =
     useCreatePlaylistMutation()
 
-  const { data, isLoading, isError, error, refetch } = useGetPlaylistQuery("")
+  const { data, isLoading, isError, error, refetch } =
+    useGetAllPlaylistVideosQuery("")
+
+  const playlistsOptions = data?.data?.map((item: TPlaylist) => ({
+    value: item._id,
+    label: item.title,
+  }))
 
   if (isLoading) return <Spinner />
   if (isError)
@@ -35,17 +45,10 @@ export default function VideoUploadForm() {
       />
     )
 
-  const playlistOptions = data?.data?.map((item: any) => ({
-    value: item._id,
-    label: item.title,
-  }))
-
-  // handle upload
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log("data", data)
     if (activeTab === "createPlaylist") {
       handleMutation(
-        { payload: { title: data.name, modelType: "ServiceVideo" } },
+        { title: data.name, modelType: "ServiceVideo" },
         createPlaylist,
         "Playlist is being created...",
         (res: any) => {
@@ -54,10 +57,14 @@ export default function VideoUploadForm() {
         },
       )
     } else {
+      data.author = user?._id
       const formData = new FormData()
-      formData.append("video", data.video[0])
+      formData.append("video", data.video[0]?.originFileObj)
+      if (data.thumbnail) {
+        formData.append("thumbnail", data.thumbnail[0]?.originFileObj)
+      }
       formData.append("data", JSON.stringify(data))
-      handleMutation(data, addVideo, "Video is being uploaded...")
+      handleMutation(formData, addVideo, "Video is being uploaded...")
     }
   }
 
@@ -67,7 +74,7 @@ export default function VideoUploadForm() {
       label: "Select Playlist",
       children: (
         <USelect
-          options={playlistOptions}
+          options={playlistsOptions}
           name="playlist"
           label="Select Playlist"
           placeholder="Select Playlist"
@@ -102,7 +109,14 @@ export default function VideoUploadForm() {
               borderClassName="!h-52"
               required={activeTab !== "createPlaylist"}
             />
-
+            <UUpload
+              name="thumbnail"
+              fileType="image"
+              label="Upload Thumbnail"
+              uploadTitle="thumbnail"
+              borderClassName="!h-52"
+              required={activeTab !== "createPlaylist"}
+            />
             <UTextArea
               name="description"
               label="Video Description"
@@ -110,7 +124,6 @@ export default function VideoUploadForm() {
               required={activeTab !== "createPlaylist"}
             />
           </Col>
-
           <Col
             span={10}
             style={{
@@ -130,7 +143,6 @@ export default function VideoUploadForm() {
             />
           </Col>
         </Row>
-
         <Button
           type="primary"
           htmlType="submit"

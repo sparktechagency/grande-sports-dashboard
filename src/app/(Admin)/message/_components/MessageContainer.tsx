@@ -10,6 +10,7 @@ import MessagesBox from "./MessageBox"
 import { useSeenMessageByChatIdMutation } from "@/redux/apis/messageApi"
 import handleMutation from "@/utils/handleMutation"
 import ChatCard from "./ChatCard"
+import io from "socket.io-client"
 
 const { Search } = Input
 
@@ -36,6 +37,24 @@ const MessageContainer = () => {
       refetch()
     })
   }
+
+  useEffect(() => {
+    const activeChat = params.get("activeChat")
+    setActiveChat(Number(activeChat) || 0)
+  }, [params])
+
+  useEffect(() => {
+    window.socket = io("http://172.252.13.74:4003/")
+    window.socket.on("chat-list::67d90dc0d0708e836727e403", (newMessages) => {
+      console.log("Received messages via Socket.IO:", newMessages)
+    })
+    window.socket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error:", error)
+    })
+    return () => {
+      window.socket?.disconnect()
+    }
+  }, [])
 
   if (isLoading) return <Spinner />
   if (isError)

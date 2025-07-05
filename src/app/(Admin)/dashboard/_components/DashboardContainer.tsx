@@ -19,7 +19,8 @@ const DashboardContainer = () => {
     new Date().getFullYear().toString(),
   )
 
-  console.log({ selectedEarningYear, selectedUserYear })
+  
+  
 
   const params = {
     earning_year: selectedEarningYear,
