@@ -24,7 +24,14 @@ const messageApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["chats", "messages"]
     }),
+    deleteChat: builder.mutation({
+      query: (chatId) => ({
+        url: `/messages/chat/${chatId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["messages", "chats"]
+    }),
   }),
 })
 
-export const { useGetMyMessagesQuery, useSendMessageMutation, useSeenMessageByChatIdMutation } = messageApi;
+export const { useGetMyMessagesQuery, useSendMessageMutation, useSeenMessageByChatIdMutation, useDeleteChatMutation } = messageApi;

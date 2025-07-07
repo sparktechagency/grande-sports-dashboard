@@ -3,43 +3,78 @@
 import { Form, Input, Button } from "antd"
 import { Icon } from "@iconify/react"
 import { Loader } from "lucide-react"
-import { useSendMessageMutation } from "@/redux/apis/messageApi"
-import handleMutation from "@/utils/handleMutation"
+import { useEffect, useState } from "react"
+import { useAppSelector } from "@/redux/hooks"
+import { selectUser } from "@/redux/slices/authSlice"
+import { useSocket } from "@/redux/hooks/useSocket"
 
 interface MessageFormProps {
   chatId: string
   receiverId: string
 }
 
-export default function MessageForm({ chatId, receiverId }: MessageFormProps) {
+export default function MessageForm({ receiverId }: MessageFormProps) {
+  const [isMessageSending, setIsMessageSending] = useState(false)
   const [form] = Form.useForm()
-  const [sendMessage, { isLoading }] = useSendMessageMutation()
+  const user = useAppSelector(selectUser)
+
+  const socket = useSocket()
+  useEffect(() => {
+    if (socket) {
+      // Connect socket if not already connected
+      if (!socket.connected) {
+        socket.connect()
+      }
+
+      socket.on("connect", () => {
+        console.log("Socket connected")
+      })
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected")
+      })
+
+      return () => {
+        socket.off("connect")
+        socket.off("disconnect")
+        // Do not disconnect socket here to maintain connection across components
+      }
+    }
+  }, [socket])
 
   /** submit ------------------------------------------------------------ */
-  const handleFinish = ({ message }: { message: string }) => {
+  const handleSendMessage = ({ message }: { message: string }) => {
+    setIsMessageSending(true)
     const text = message.trim()
     if (!text) return // double‑check (shouldn’t be possible)
 
     const payload = {
-      chat: chatId,
       text,
       receiver: receiverId,
+      sender: user?._id || "",
     }
 
-    handleMutation(payload, sendMessage, undefined, () => form.resetFields())
+    // return console.log("Sending message:", JSON.stringify(payload))
+    if (socket.connected) {
+      form.resetFields()
+      setIsMessageSending(false)
+      socket.emit("send-message", payload)
+    } else {
+      setIsMessageSending(false)
+      console.error("Socket not connected, message not sent")
+    }
   }
 
   /** UI ---------------------------------------------------------------- */
   return (
     <Form
       form={form}
-      onFinish={handleFinish}
+      onFinish={handleSendMessage}
       className="mt-10 flex w-full gap-x-4"
     >
       <Form.Item
         name="message"
         className="m-0 flex-grow"
-        rules={[{ required: true, whitespace: true, message: " " }]} // keeps AntD happy
+        rules={[{ required: true, whitespace: true, message: " " }]}
       >
         <Input
           size="large"
@@ -53,7 +88,7 @@ export default function MessageForm({ chatId, receiverId }: MessageFormProps) {
         {() => {
           // disable if empty / only whitespace OR while loading
           const disabled =
-            isLoading || !form.getFieldValue("message")?.trim()?.length
+            isMessageSending || !form.getFieldValue("message")?.trim()?.length
 
           return (
             <Button
@@ -63,7 +98,7 @@ export default function MessageForm({ chatId, receiverId }: MessageFormProps) {
               disabled={disabled}
               className={`disabled:!bg-primary !aspect-square !rounded-full !shadow-none disabled:!cursor-not-allowed disabled:!text-white disabled:!opacity-60`}
             >
-              {isLoading ? (
+              {isMessageSending ? (
                 <Loader className="animate-spin" />
               ) : (
                 <Icon icon="material-symbols:send" height={20} width={20} />
