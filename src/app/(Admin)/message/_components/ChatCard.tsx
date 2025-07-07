@@ -1,4 +1,6 @@
 import CustomAvatar from "@/components/CustomAvatar"
+import { useAppSelector } from "@/redux/hooks"
+import { selectUser } from "@/redux/slices/authSlice"
 import { timeAgo } from "@/utils/timeAgo"
 
 interface ChatCardProps {
@@ -8,9 +10,12 @@ interface ChatCardProps {
 }
 
 const ChatCard = ({ data, active }: ChatCardProps) => {
+  const me = useAppSelector(selectUser)
   const { chat, message, unreadMessageCount } = data
   const user = chat?.participants[0]
-  const isRead = message?.seen || active
+  const isLasterSenderMe = message?.sender == me?._id
+  const isRead = isLasterSenderMe || message?.seen || active
+
   return (
     <div
       className={`flex-center-start cursor-pointer gap-x-3 px-2 py-3 ${
@@ -37,7 +42,10 @@ const ChatCard = ({ data, active }: ChatCardProps) => {
           </div>
         </div>
         <p className={`text-ellipsis ${isRead ? "font-normal" : "font-bold"}`}>
-          {message?.text?.slice(0, 35)}...
+          {isLasterSenderMe ? "You: " : ""}
+          {message.text.length > 30
+            ? `${message.text.slice(0, 30)}...`
+            : message.text}
         </p>
       </div>
     </div>

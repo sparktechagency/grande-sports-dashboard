@@ -17,9 +17,9 @@ import { selectUser } from "@/redux/slices/authSlice"
 import { format } from "date-fns"
 import { useEffect, useState } from "react"
 import Spinner from "../skeletons/Spinner"
-import { socket } from "@/socket"
 import handleMutation from "@/utils/handleMutation"
 import { toast } from "react-toastify"
+import { useSocket } from "@/redux/hooks/useSocket"
 
 const { Header } = Layout
 
@@ -32,10 +32,12 @@ export default function HeaderContainer({
   collapsed,
   setCollapsed,
 }: HeaderContainerProps) {
+  const tokenUser = useAppSelector(selectUser)
+
   const [deleteAll, { isLoading: isDeleting }] =
     useDeleteAllNotificationsMutation()
-  const page = 1
-  const [limit, setLimit] = useState(8)
+  const [page, setPage] = useState(1)
+  const limit = 8
 
   const {
     data: notificationRes,
@@ -48,49 +50,52 @@ export default function HeaderContainer({
 
   // set notifications in the state
   const [notifications, setNotifications] = useState(notificationData)
-  console.log("notificationData:", notificationData)
+
   useEffect(() => {
-    setNotifications(notificationData)
-  }, [notificationData])
-  // console.log("Notification Data:", notificationData)
+    if (!isNotificationLoading && !isNotificationError) {
+      setNotifications(notificationData)
+    }
+  }, [isNotificationLoading, isNotificationError, notificationData])
+
   const pathname = usePathname()
   const navbarTitle = pathname.split("/")[1]
-  const tokenUser = useAppSelector(selectUser)
   const { data } = useGetUserProfileQuery("", { skip: !tokenUser })
   const user = data?.data
 
+  const socket = useSocket()
   useEffect(() => {
-    // Connect socket if not already connected
-    if (!socket.connected) {
-      socket.connect()
-    }
+    if (socket) {
+      if (!socket.connected) {
+        socket.connect()
+      }
 
-    // Listen for real-time notification event
-    socket.on(`notification::${user?._id}`, (newNotification) => {
-      toast.info(newNotification.message, {
-        autoClose: 12000,
+      // Listen for real-time notification event
+      socket.on(`notification::${tokenUser?._id}`, (newNotification: any) => {
+        toast.info(newNotification.message, {
+          autoClose: 7000,
+        })
+        console.log("Received real-time notification:", newNotification)
+        setNotifications((prev: any) => [newNotification, ...prev])
       })
-      console.log("Received real-time notification:", newNotification)
-      setNotifications((prev: any) => [newNotification, ...prev])
-    })
 
-    socket.on("connect", () => {
-      console.log("Socket connected")
-    })
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected")
-    })
+      socket.on("connect", () => {
+        console.log("Socket connected")
+      })
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected")
+      })
 
-    return () => {
-      socket.off(`notification::${user?._id}`)
-      socket.off("connect")
-      socket.off("disconnect")
-      // Do not disconnect socket here to maintain connection across components
+      return () => {
+        socket.off(`notification::${tokenUser?._id}`)
+        socket.off("connect")
+        socket.off("disconnect")
+        // Do not disconnect socket here to maintain connection across components
+      }
     }
-  }, [user])
+  }, [socket])
 
   const handleLoadMore = () => {
-    setLimit((prevLimit) => prevLimit + limit)
+    setPage((prev) => prev + 1)
   }
 
   const handleDeleteAll = async () => {

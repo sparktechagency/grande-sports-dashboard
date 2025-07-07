@@ -28,7 +28,7 @@
 }
 
 :root {
-  --primary: rgb(5, 122, 58);
+  --primary: #057a3a;
   --primary-50: rgba(5, 122, 58, 0.4);
   --primary-30: rgba(5, 122, 58, 0.3);
 

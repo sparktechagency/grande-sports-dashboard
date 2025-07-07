@@ -7,12 +7,14 @@ const chatApi = baseApi.injectEndpoints({
         url: "/chats/my-chat-list",
         method: "GET",
       }),
+      providesTags: ["chats"]
     }),
     getSingleChat: builder.query({
       query: (id) => ({
         url: `/chats/${id}`,
         method: "GET"
       }),
+      providesTags: ["chats"]
     }),
   }),
 })
