@@ -51,7 +51,7 @@ export default function UserProfileModal({
           </div>
           <div>
             <h5 className="font-bold">Contact</h5>
-            <p className="text-base">{user?.contactNumber}</p>
+            <p className="text-base">{user?.contact || "N/A"}</p>
           </div>
           <div>
             <h5 className="!mb-1 font-bold">Status</h5>

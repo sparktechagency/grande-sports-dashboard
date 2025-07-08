@@ -1,8 +1,12 @@
-import MessageContainer from "./_components/MessageContainer"
+"use client"
+import dynamic from "next/dynamic"
 
-export const metadata = {
-  title: "Messages",
-}
+const MessageContainer = dynamic(
+  () => import("./_components/MessageContainer"),
+  {
+    ssr: false, // Disable SSR
+  },
+)
 
 export default function Message() {
   return <MessageContainer />

@@ -2,7 +2,7 @@
 import { ArrowLeft, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Pagination } from "antd"
 
 import { useGetPlaylistVideosQuery } from "@/redux/apis/videoApi"
@@ -15,13 +15,10 @@ import PlaylistVideoCard from "./PlaylistVideoCard"
 import handleMutation from "@/utils/handleMutation"
 import { TVideo } from "@/interface/video.interface"
 
-export default function PlaylistDetails({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function PlaylistDetails() {
+  const pathName = usePathname()
+  const id = pathName.split("playlist/")[1]
   const router = useRouter()
-  const id = params.id
   const [page, setPage] = useState(1)
   const limit = 5
 

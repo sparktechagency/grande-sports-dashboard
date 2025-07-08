@@ -25,6 +25,7 @@ export interface IUser {
   email: string
   photoUrl: string
   status: "active" | "blocked"
+  contact?: string
   id: string
   createdAt: string
 }

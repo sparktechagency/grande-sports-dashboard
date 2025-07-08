@@ -70,5 +70,20 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth/:path*", ...PROTECTED_PATHS.map((path) => path + "/:path*"), ...PROTECTED_PATHS],
+  matcher: [
+    "/auth/:path*",
+    "/dashboard",
+    "/users",
+    "/earning",
+    "/subscription",
+    "/videos/playlist",
+    "/videos/upload",
+    "/community",
+    "/message",
+    "/settings",
+    "/profile",
+    "/privacy-policy",
+    "/terms-conditions",
+    "/about-us",
+  ],
 }
