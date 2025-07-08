@@ -1,7 +1,7 @@
 import VideoEditForm from "./VideoEditForm"
 
-const EditVideoPage = async ({ params }: { params: { id: string } }) => {
-  return <VideoEditForm videoId={await params.id} />
+const EditVideoPage = async () => {
+  return <VideoEditForm />
 }
 
 export default EditVideoPage

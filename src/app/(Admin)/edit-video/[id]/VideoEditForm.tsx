@@ -7,17 +7,18 @@ import UTextArea from "@/components/form-components/UTextArea"
 import UUpload from "@/components/form-components/UUpload"
 import Spinner from "@/components/skeletons/Spinner"
 import ErrorComponent from "@/components/skeletons/ErrorComponent"
-import {
-  useGetAllPlaylistVideosQuery,
-} from "@/redux/apis/playlistApi"
+import { useGetAllPlaylistVideosQuery } from "@/redux/apis/playlistApi"
 import { FieldValues, SubmitHandler } from "react-hook-form"
 import { useGetVideoQuery, useUpdateVideoMutation } from "@/redux/apis/videoApi"
 import handleMutation from "@/utils/handleMutation"
 import { useAppSelector } from "@/redux/hooks"
 import { selectUser } from "@/redux/slices/authSlice"
 import { TPlaylist } from "../../videos/playlist/page"
+import { usePathname } from "next/navigation"
 
-export default function VideoEditForm({ videoId }: { videoId: string }) {
+export default function VideoEditForm() {
+  const pathName = usePathname()
+  const videoId = pathName.split("video/")[1]
   const user = useAppSelector(selectUser)
   const [updateVideo, { isLoading: isUpdating }] = useUpdateVideoMutation()
 

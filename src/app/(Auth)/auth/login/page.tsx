@@ -1,8 +1,10 @@
-import LoginForm from "./_components/LoginForm"
+"use client"
+import dynamic from "next/dynamic";
 
-export const metadata = {
-  title: "Login",
-}
+const LoginForm = dynamic(() => import("./_components/LoginForm"), {
+  ssr: false, // Disable SSR
+});
+
 export default function LoginPage() {
   return <LoginForm />
 }
