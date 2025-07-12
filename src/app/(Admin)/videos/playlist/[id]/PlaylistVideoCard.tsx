@@ -55,13 +55,13 @@ const PlaylistVideoCard = ({ video }: { video: TVideo }) => {
           </p>
         </div>
         <div>
-          <button className="cursor-pointer p-2">
-            <Dropdown menu={{ items }} trigger={["click"]}>
+          <Dropdown menu={{ items }} trigger={["click"]}>
+            <button className="cursor-pointer p-2">
               <a onClick={(e) => e.preventDefault()}>
                 <EllipsisVertical className="text-white" size={20} />
               </a>
-            </Dropdown>
-          </button>
+            </button>
+          </Dropdown>
         </div>
       </div>
     </div>

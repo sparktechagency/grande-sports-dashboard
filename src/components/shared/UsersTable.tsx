@@ -85,9 +85,7 @@ const UsersTable = ({
     {
       title: "Sr. No.",
       dataIndex: "key",
-      render(value) {
-        return <span>#{value}</span>
-      },
+      render: (_: any, __: any, index: number) => <span>{index + 1}</span>,
     },
     {
       title: "Name",

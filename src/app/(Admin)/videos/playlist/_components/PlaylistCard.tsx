@@ -30,7 +30,7 @@ export default function PlaylistCard({ playlist, idx }: PlaylistCardProps) {
   }
 
   return (
-    <div key={idx}>
+    <Link href={`/videos/playlist/${playlist.id}`} key={idx}>
       <div
         style={{
           height: ThumbnailHeight,
@@ -126,6 +126,6 @@ export default function PlaylistCard({ playlist, idx }: PlaylistCardProps) {
         <h4 className="text-2xl font-medium text-white">{playlist.title}</h4>
         <p className="!text-gray-300">View full playlist</p>
       </Link>
-    </div>
+    </Link>
   )
 }
