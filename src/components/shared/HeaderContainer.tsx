@@ -36,8 +36,8 @@ export default function HeaderContainer({
 
   const [deleteAll, { isLoading: isDeleting }] =
     useDeleteAllNotificationsMutation()
-  const [page, setPage] = useState(1)
-  const limit = 8
+  const [limit, setLimit] = useState(8)
+  const page = 1
 
   const {
     data: notificationRes,
@@ -95,7 +95,7 @@ export default function HeaderContainer({
   }, [socket])
 
   const handleLoadMore = () => {
-    setPage((prev) => prev + 1)
+    setLimit((prev) => prev + 8)
   }
 
   const handleDeleteAll = async () => {
